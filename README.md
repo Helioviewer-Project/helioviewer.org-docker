@@ -2,6 +2,13 @@
 This repo provides a containerized development environment for working with HelioViewer
 
 # Installation
+Make sure you have (docker)[https://www.docker.com/get-started] installed.
+
+Open a terminal and clone this repository.
+```bash
+git clone https://github.com/dgarciabriseno/helioviewer-dev-docker.git
+```
+
 Pull the helioviewer sources with the following commands
 ```bash
 git submodule update --init --recursive --remote
