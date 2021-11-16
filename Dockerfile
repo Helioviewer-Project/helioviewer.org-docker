@@ -13,7 +13,8 @@ RUN apt install -y software-properties-common
 RUN add-apt-repository ppa:rock-core/qt4
 RUN apt update;
 RUN apt upgrade;
-RUN apt install -y wget apache2 php7.4 php7.4-mysql php7.4-curl php-pear php-imagick php-mbstring php-bcmath libapache2-mod-php mysql-server redis-server imagemagick python3-mysqldb python-tk python3-tk python3-pip ffmpeg git libpng-dev libgsf-1-114 git vim qt4-default qt4-qmake ant
+RUN apt update
+RUN apt install -y wget apache2 php7.4 php7.4-mysql php7.4-curl php-pear php-imagick php-mbstring php-bcmath php-redis libapache2-mod-php mysql-server redis-server imagemagick python3-mysqldb python-tk python3-tk python3-pip ffmpeg git libpng-dev libgsf-1-114 git vim qt4-default qt4-qmake ant
 RUN pip3 install sunpy glymur zeep bs4 drms lxml numpy scipy datetime pandas bokeh==2.2.1 matplotlib pathlib joblib sip
 
 # Set up SIP and PyQt4 from source (distributed binaries have been obsoleted)
@@ -47,6 +48,7 @@ COPY my.cnf /etc/my.cnf
 
 # Copy startup script
 COPY startup.sh /root/startup.sh
+COPY install.sh /root/install.sh
 
 EXPOSE 80
 EXPOSE 81

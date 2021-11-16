@@ -1,6 +1,6 @@
 [submodule "helioviewer.org"]
 	path = helioviewer.org
-	url = https://github.com/Helioviewer-Project/helioviewer.org.git
+	url = git@github.com:dgarciabriseno/helioviewer.org.git
 [submodule "api"]
 	path = api
-	url = https://github.com/Helioviewer-Project/api.git
+	url = git@github.com:dgarciabriseno/api.git
