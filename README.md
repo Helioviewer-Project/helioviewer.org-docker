@@ -2,16 +2,9 @@
 This repo provides a containerized development environment for working with HelioViewer
 
 # Installation
-Pull the latest helioviewer sources with the following commands
+Pull the helioviewer sources with the following commands
 ```bash
 git submodule update --init --recursive --remote
-cd api
-git fetch
-git pull origin master
-
-cd ../helioviewer.org
-git fetch
-git pull origin master
 ```
 
 You may also want to change the remotes for the submodules if you have a fork that
