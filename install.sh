@@ -7,6 +7,8 @@ SITE_DIR=/var/www-api/docroot
 # PERMISSIONS
 cd $SITE_DIR
 su www-data -s /bin/bash -c 'mkdir -p log cache'
+cd $SITE_DIR/resources/build
+ant
 
 # Set up Kakadu inside the api folder.
 cd $API_DIR
