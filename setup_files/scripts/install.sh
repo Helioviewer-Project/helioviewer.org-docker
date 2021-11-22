@@ -6,6 +6,7 @@ SITE_DIR=/var/www-api/docroot
 
 # PERMISSIONS
 cd $SITE_DIR
+cp ~/app_config/Config.js resources/js/Utility/Config.js
 su www-data -s /bin/bash -c 'mkdir -p log cache'
 cd $SITE_DIR/resources/build
 ant
@@ -19,8 +20,15 @@ mv bin/* /usr/local/bin/
 
 # Create configuration files.
 cd $API_DIR/settings
-cp Config.Example.ini Config.ini
-cp Private.Example.php Private.php
+if ! [ -f "Config.ini" ]
+then
+    cp ~/app_config/Config.ini Config.ini
+fi
+
+if ! [ -f "Private.php" ]
+then
+    cp ~/app_config/Private.php Private.php
+fi
 
 cd $API_DIR/install
 python3 install.py
