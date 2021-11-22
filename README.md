@@ -7,16 +7,8 @@ Open a terminal and clone this repository.
 git clone https://github.com/dgarciabriseno/helioviewer-dev-docker.git
 ```
 
-Pull the helioviewer sources with the following commands
+cd into the cloned folder and pull the helioviewer sources with the following commands
 ```bash
-git submodule update --init --recursive --remote
-```
-
-You may also want to change the remotes for the submodules if you have a fork that
-you want them to point to. To do this, edit the .gitmodules file to point to your fork
-and then run the following:
-```bash
-git submodule sync
 git submodule update --init --recursive --remote
 ```
 

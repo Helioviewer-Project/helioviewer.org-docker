@@ -9,6 +9,7 @@ cd $SITE_DIR
 cp ~/app_config/Config.js resources/js/Utility/Config.js
 su www-data -s /bin/bash -c 'mkdir -p log cache'
 cd $SITE_DIR/resources/build
+chmod +x jsmin/jsmin.py
 ant
 
 # Set up Kakadu inside the api folder.
