@@ -4,7 +4,7 @@ This repo provides a containerized development environment for working with Heli
 # Installation
 Open a terminal and clone this repository.
 ```bash
-git clone https://github.com/dgarciabriseno/helioviewer-dev-docker.git
+git clone git@github.com:Helioviewer-Project/helioviewer.org-docker.git
 ```
 
 cd into the cloned folder and pull the helioviewer sources with the following commands
