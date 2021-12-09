@@ -11,7 +11,7 @@ RUN apt update;
 RUN apt upgrade;
 RUN apt update
 RUN apt install -y wget apache2 php7.4 php7.4-mysql php7.4-curl php-pear php-imagick php-mbstring php-bcmath php-redis libapache2-mod-php mysql-server redis-server imagemagick python3-mysqldb python-tk python3-tk python3-pip ffmpeg git libpng-dev libgsf-1-114 git vim ant
-RUN pip3 install sunpy glymur zeep bs4 drms lxml numpy scipy datetime pandas bokeh==2.2.1 matplotlib pathlib joblib
+RUN pip3 install sunpy==2.0.5 glymur zeep bs4 drms lxml numpy scipy datetime pandas bokeh==2.2.1 matplotlib pathlib joblib
 
 # Copy server configuration files
 RUN rm /etc/apache2/sites-enabled/000-default.conf
@@ -23,6 +23,7 @@ COPY setup_files/server/my.cnf /etc/my.cnf
 # Enable the site and apache plugins
 RUN a2ensite helioviewer
 RUN a2enmod headers
+RUN a2enmod rewrite
 
 # Copy config files
 COPY setup_files/app_config /root/app_config
