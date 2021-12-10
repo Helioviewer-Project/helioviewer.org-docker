@@ -17,6 +17,8 @@ ant
 # Set up jp2 file index
 cd $API_DIR
 ln -s /var/www-api/jp2 $API_DIR/docroot/jp2
+mkdir docroot/cache
+mkdir log
 
 # Set up Kakadu inside the api folder.
 cd $API_DIR/install/kakadu
@@ -36,6 +38,10 @@ if ! [ -f "Private.php" ]
 then
     cp ~/app_config/Private.php Private.php
 fi
+
+# Start up movie builder
+cd $API_DIR/scripts
+nohup tcsh movie_queue.tcsh > $API_DIR/log/movie_builder.log
 
 cd $API_DIR/install
 python3 install.py
