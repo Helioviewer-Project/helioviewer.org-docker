@@ -1,9 +1,8 @@
-# Startup background services
-source startup.sh
-
 API_DIR=/var/www-api/api.helioviewer.org
 SITE_DIR=/var/www-api/docroot
 
+unzip -qo 2021.zip -d /var/www-api/jp2
+rm 2021.zip
 # Set up site config and create local directories
 cd $SITE_DIR
 cp ~/app_config/Config.js resources/js/Utility/Config.js
@@ -38,10 +37,6 @@ if ! [ -f "Private.php" ]
 then
     cp ~/app_config/Private.php Private.php
 fi
-
-# Start up movie builder
-cd $API_DIR/scripts
-nohup tcsh movie_queue.tcsh > $API_DIR/log/movie_builder.log
 
 cd $API_DIR/install
 python3 install.py

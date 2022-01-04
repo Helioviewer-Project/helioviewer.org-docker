@@ -30,8 +30,13 @@ RUN a2enmod rewrite
 COPY setup_files/app_config /root/app_config
 
 # Copy helpful scripts
-COPY setup_files/scripts/startup.sh /root/startup.sh
-COPY setup_files/scripts/install.sh /root/install.sh
+COPY setup_files/scripts/* /root/
+
+# Copy sample data (so users don't need to provide
+# their own for the installation to work)
+COPY sample-data/* /root/
+
+RUN mkdir /root/log
 
 # Open container ports to the host
 EXPOSE 80
@@ -41,6 +46,7 @@ EXPOSE 81
 VOLUME /var/www-api/docroot
 VOLUME /var/www-api/api.helioviewer.org
 VOLUME /var/www-api/jp2
+RUN ln -s /var/www-api /var/www
 
 WORKDIR /root
-
+CMD [ "bash", "/root/startup.sh" ]
