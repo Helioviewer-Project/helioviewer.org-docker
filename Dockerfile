@@ -26,11 +26,8 @@ RUN a2ensite helioviewer
 RUN a2enmod headers
 RUN a2enmod rewrite
 
-# Copy config files
-COPY setup_files/app_config /root/app_config
-
 # Copy helpful scripts
-COPY setup_files/scripts/* /root/
+COPY setup_files /root/setup_files/
 
 # Copy sample data (so users don't need to provide
 # their own for the installation to work)
@@ -43,10 +40,9 @@ EXPOSE 80
 EXPOSE 81
 
 # Set up mount points for the devleopment folders
-VOLUME /var/www-api/docroot
-VOLUME /var/www-api/api.helioviewer.org
-VOLUME /var/www-api/jp2
-RUN ln -s /var/www-api /var/www
+VOLUME /var/www/helioviewer.org
+VOLUME /var/www/api.helioviewer.org
+VOLUME /var/www/jp2
 
-WORKDIR /root
-CMD [ "bash", "/root/startup.sh" ]
+WORKDIR /root/setup_files/scripts
+CMD [ "bash", "startup.sh" ]
