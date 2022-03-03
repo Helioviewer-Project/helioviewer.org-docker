@@ -18,6 +18,8 @@ then
 
     # Set up site config and create local directories
     cp ~/setup_files/app_config/Config.js $SITE_DIR/resources/js/Utility/Config.js
+    cp ~/setup_files/app_config/settings.cfg $API_DIR/install/settings/settings.cfg
+
     su www-data -s /bin/bash -c "mkdir -p $SITE_DIR/log $SITE_DIR/cache"
 
     # Copy API configuration files
