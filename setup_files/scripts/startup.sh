@@ -18,7 +18,6 @@ service mysql start
 redis-server --daemonize yes
 # Start up movie builder
 nohup tcsh /var/www/api.helioviewer.org/scripts/movie_queue.tcsh > /var/www/api.helioviewer.org/log/movie_builder.log
-nohup /root/setup_files/scripts/download_data.sh > /root/downloader_log.log &
 
 echo "Container up and running"
 read
