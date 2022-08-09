@@ -2,12 +2,12 @@
 /**
  * Note: These settings are defined for the pre-built container environment,
  *       this configuration is not suitable for production.
- * 
+ *
  */
 /**
 * Database Information
 */
-define("HV_DB_HOST", "localhost");
+define("HV_DB_HOST", "127.0.0.1");
 define("HV_DB_NAME", "helioviewer");
 define("HV_DB_USER", "helioviewer");
 define("HV_DB_PASS", "helioviewer");
@@ -38,7 +38,7 @@ define("HV_MOVIE_ID_PASS", "");
 
 /**
  * bit.ly API user and key
- * 
+ *
  * This is used to shorten Helioviewer.org URLs for easier sharing on
  * Twitter etc. For more information and to register for a free API key, see:
  * http://code.google.com/p/bitly-api/wiki/ApiDocumentation
@@ -57,7 +57,7 @@ define("HV_PROXY_USER_PASSWORD", ""); // must be a string in username:password f
  * Terminal commands that need to be checked for running
  * Example:
  * serialize(array(
- * 	   'terminal command' => 'name of command'	 
+ * 	   'terminal command' => 'name of command'
  * ))
  *
  * TODO:

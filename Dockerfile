@@ -16,7 +16,6 @@ RUN gem install resque
 
 # Get composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-RUN php -r "if (hash_file('sha384', 'composer-setup.php') === '906a84df04cea2aa72f40b5f787e49f22d4c2f19492ac310e8cba5b96ac8b64115ac402c8cd292b8a03482574915d1a8') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
 RUN php composer-setup.php
 RUN php -r "unlink('composer-setup.php');"
 RUN mv composer.phar /usr/local/bin/composer
@@ -28,6 +27,7 @@ COPY setup_files/server/apache2.conf /etc/apache2/apache2.conf
 COPY setup_files/server/ports.conf /etc/apache2/ports.conf
 COPY setup_files/server/my.cnf /etc/my.cnf
 COPY setup_files/scripts/crontab /etc/cron.d/crontab
+COPY setup_files/welcome_message.txt /etc/motd
 
 # Enable the site and apache plugins
 RUN a2ensite helioviewer
@@ -38,6 +38,9 @@ RUN a2enmod rewrite
 COPY setup_files /root/setup_files/
 RUN crontab /root/setup_files/scripts/crontab
 RUN rm /root/setup_files/scripts/crontab
+
+# Make sure the welcome message shows when user enters the console
+RUN sh /root/setup_files/scripts/show_motd.sh
 
 # Copy sample data (so users don't need to provide
 # their own for the installation to work)
@@ -52,6 +55,10 @@ EXPOSE 81
 # Set up mount points for the devleopment folders
 VOLUME /var/www/helioviewer.org
 VOLUME /var/www/api.helioviewer.org
+
+# Tell user what more they need to do to complete setup
+RUN
+
 
 WORKDIR /root/setup_files/scripts
 CMD [ "bash", "startup.sh" ]
