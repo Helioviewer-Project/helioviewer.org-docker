@@ -30,7 +30,14 @@ Next, to build the container, run Docker and then execute the following command:
 docker build -t helioviewer-dev:test .
 ```
 
-Now spin up the container using the provided run.sh
+Or if you're running on a mac with an m1 chip, use the following command:
+```bash
+docker buildx create --use
+docker buildx build --platform linux/x86_64 --load -t helioviewer-dev:test
+```
+The container must run under x86\_64 because there are some 3rd party binaries included in the container that have only been compiled for x86\_64 cpus.
+
+Now spin up the container using the provided `run.sh`
 *Note* - if you have different paths for any folders (api, helioviewer.org, or sample-data)
 or if you built the container with a different name, then you can specify these in run.sh
 ```bash

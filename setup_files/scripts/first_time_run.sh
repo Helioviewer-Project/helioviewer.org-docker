@@ -20,7 +20,8 @@ then
     cp ~/setup_files/app_config/Config.js $SITE_DIR/resources/js/Utility/Config.js
     cp ~/setup_files/app_config/settings.cfg $API_DIR/install/settings/settings.cfg
 
-    su www-data -s /bin/bash -c "mkdir -p $SITE_DIR/log $SITE_DIR/cache"
+    mkdir -p $SITE_DIR/log $SITE_DIR/cache
+    chown www-data:www-data $SITE_DIR/log $SITE_DIR/cache
 
     # Copy API configuration files
     if [ ! -f "$API_DIR/settings/Config.ini" ]
