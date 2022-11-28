@@ -27,7 +27,7 @@ items are ok.)
 
 Next, to build the container, run Docker and then execute the following command:
 ```bash
-docker build -t helioviewer-dev:latest .
+docker build -t helioviewer-dev:test .
 ```
 
 Now spin up the container using the provided run.sh
