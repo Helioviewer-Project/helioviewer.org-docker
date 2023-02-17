@@ -8,7 +8,7 @@ RUN dnf install -y xz gcc make readline-devel libxml2-devel httpd-devel httpd au
                    python38-pip python38-devel \
                    sudo expect \
                    libpng-devel
-    
+
 # Enable mysql community server and install it
 RUN dnf config-manager --disable mysql*; dnf config-manager --enable mysql80-community; dnf module disable -y mysql
 RUN dnf install -y mysql-community-server mysql-community-devel
@@ -75,6 +75,9 @@ USER helioviewer
 COPY --chown=helioviewer:helioviewer setup_files /home/helioviewer/setup_files
 RUN curl --output api.zip -s -X GET https://codeload.github.com/Helioviewer-Project/api/zip/refs/heads/master; \
    unzip -q api.zip;\
+   python3 -m pip install --user -r /tmp/api-master/docs/src/requirements.txt \
+   python3 -m pip install --user -r /tmp/api-master/scripts/availability_feed/requirements.txt \
+   python3 -m pip install --user -r /tmp/api-master/scripts/hv_stats/requirements.txt \
    cd /home/helioviewer/setup_files/scripts; \
    sudo mysqld --user=mysql -D; ./headless_setup.sh; \
    rm -rf /tmp/api.zip /tmp/api-master; \
