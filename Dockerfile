@@ -17,7 +17,7 @@ RUN dnf install -y mysql-community-server mysql-community-devel
 RUN curl -s --output php8.tar.xz -X GET https://www.php.net/distributions/php-8.2.3.tar.xz;      \
     tar xf php8.tar.xz;                                                                          \
     cd ${INSTALL_PATH}/php-8.2.3;                                                                \
-    mkdir /etc/php.d; cp php.ini-production /etc/php.ini;                                        \
+    mkdir /etc/php.d; cp php.ini-development /etc/php.ini;                                        \
     ./configure --with-apxs2=/usr/bin/apxs --with-curl --enable-pcntl --with-openssl --with-pear \
                 --with-mysqli --with-readline --enable-fpm --enable-phpdbg --without-iconv       \
                 --without-sqlite3 --without-pdo-sqlite --with-config-file-path=/etc              \
@@ -37,7 +37,9 @@ RUN echo $'<FilesMatch \.php$>\nSetHandler application/x-httpd-php\n</FilesMatch
     echo "extension=redis.so" > /etc/php.d/redis.ini;                                                                       \
     echo "extension=imagick.so" > /etc/php.d/imagick.ini;                                                                   \
     echo "helioviewer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers;                                                              \
-    echo "export LD_LIBRARY_PATH=/usr/local/lib" >> /etc/bashrc;
+    echo "export LD_LIBRARY_PATH=/usr/local/lib" >> /etc/bashrc;                                                            \
+    echo '!includedir /etc/my.cnf.d' >> /etc/my.cnf;                                                                        \
+    touch /tmp/sdo-backfill.log /tmp/sdo-monthly.log /tmp/rob-backfill.log /tmp/rob-monthly.log /tmp/soho-backfill.log /tmp/soho-monthly.log /tmp/stereo-backfill.log /tmp/stereo-monthly.log;
 
 # Need to install pecl redis somewhere, but no good place to put it.
 RUN yes '' | pecl install redis
@@ -90,7 +92,7 @@ COPY setup_files/server/my.cnf /etc/my.cnf.d/my.cnf
 RUN mkdir -p /home/helioviewer/httpd; \
     sudo chmod +x /home/helioviewer; \
     sudo rm /etc/httpd/conf.d/welcome.conf; \
-    sudo sh ${INSTALL_PATH}/add_ports.sh
+    sudo sh ${INSTALL_PATH}/add_ports.sh;
 
 USER helioviewer
 COPY setup_files/scripts/crontab /home/helioviewer/.crontab
