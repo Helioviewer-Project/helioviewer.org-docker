@@ -1,64 +1,84 @@
-FROM ubuntu:20.04
+FROM oraclelinux:8
+ENV INSTALL_PATH=/root/.install
 
-# Environment variables
-ENV TZ=US/Eastern
+# Download, Compile, and Install PHP8
+WORKDIR ${INSTALL_PATH}
+RUN dnf update
+RUN dnf install -y xz gcc make readline-devel libxml2-devel httpd-devel httpd autoconf
+RUN curl -s --output php8.tar.xz -X GET https://www.php.net/distributions/php-8.2.3.tar.xz
+RUN tar xf php8.tar.xz
+WORKDIR ${INSTALL_PATH}/php-8.2.3
+RUN mkdir /etc/php.d; cp php.ini-production /etc/php.ini;
+RUN ./configure --with-apxs2=/usr/bin/apxs --with-openssl --with-pear --with-mysqli --with-readline --enable-fpm --enable-phpdbg --without-iconv --without-sqlite3 --without-pdo-sqlite --with-config-file-path=/etc --with-config-file-scan-dir=/etc/php.d; make; make install;
+RUN sed "s/NONE/\/usr\/local/" sapi/fpm/php-fpm.conf > /usr/local/etc/php-fpm.conf
+RUN mkdir -p /etc/php-fpm.d
+RUN cp sapi/fpm/www.conf /usr/local/etc/php-fpm.d
+RUN echo $'<FilesMatch \.php$>\nSetHandler application/x-httpd-php\n</FilesMatch>' > /etc/httpd/conf.modules.d/20-php.conf
+RUN echo "DirectoryIndex index.html index.php" > /etc/httpd/conf.modules.d/30-indexes.conf
+RUN yes '' | pecl install redis
+RUN yes '' | pecl install imagick
+RUN echo "extension=redis.so" > /etc/php.d/redis.ini
+RUN echo "extension=imagick.so" > /etc/php.d/imagick.ini
 
-# Setup timezone so installation doesn't ask for geo
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# Get ffmpeg for making videos
+WORKDIR ${INSTALL_PATH}
+RUN curl -s --output ffmpeg.tar.xz -X GET https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+RUN tar xf ffmpeg.tar.xz
+RUN install ffmpeg-5.1.1-amd64-static/ffmpeg /usr/local/bin/ffmpeg
 
-# Install required packages
-RUN apt update
-RUN apt upgrade -y
-RUN apt update
-RUN apt install -y tcsh ruby wget apache2 php7.4 php7.4-mysql php7.4-curl php-pear php-imagick php-mbstring php-bcmath php-redis libapache2-mod-php mysql-server redis-server imagemagick python3-mysqldb python-tk python3-tk python3-pip ffmpeg git libpng-dev libgsf-1-114 git vim ant cron
-RUN pip3 install sunpy==2.0.5 glymur zeep bs4 drms lxml numpy scipy datetime pandas bokeh==2.2.1 matplotlib pathlib joblib
-RUN gem install resque
+# Get image magick
+RUN dnf install -y unzip
+RUN curl -s --output imagemagick.zip -X GET https://codeload.github.com/ImageMagick/ImageMagick6/zip/refs/tags/6.9.12-70
+RUN unzip imagemagick.zip
+WORKDIR ${INSTALL_PATH}/ImageMagick6-6.9.12-70
+RUN ./configure; make; make install
 
-# Get composer
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-RUN php composer-setup.php
-RUN php -r "unlink('composer-setup.php');"
-RUN mv composer.phar /usr/local/bin/composer
+# Install dependencies
+RUN dnf install -y tcsh ruby wget redis vim ant cronie python38
+# MySQL is special on enterprise linux
+RUN dnf install -y https://repo.mysql.com/mysql80-community-release-el8.rpm
+RUN dnf config-manager --disable mysql*; dnf config-manager --enable mysql80-community; dnf module disable -y mysql
+RUN dnf install -y mysql-community-server mysql-community-devel
+USER mysql
+RUN mysqld --initialize-insecure
 
-# Copy server configuration files
-RUN rm /etc/apache2/sites-enabled/000-default.conf
-COPY setup_files/server/helioviewer.conf /etc/apache2/sites-available/helioviewer.conf
-COPY setup_files/server/apache2.conf /etc/apache2/apache2.conf
-COPY setup_files/server/ports.conf /etc/apache2/ports.conf
-COPY setup_files/server/my.cnf /etc/my.cnf
-COPY setup_files/scripts/crontab /etc/cron.d/crontab
-COPY setup_files/welcome_message.txt /etc/motd
 
-# Enable the site and apache plugins
-RUN a2ensite helioviewer
-RUN a2enmod headers
-RUN a2enmod rewrite
+# Helioviewer dependencies
+USER root
+RUN dnf install -y python38-pip python38-devel expect sudo
 
-# Copy helpful scripts
-COPY setup_files /root/setup_files/
-RUN crontab /root/setup_files/scripts/crontab
-RUN rm /root/setup_files/scripts/crontab
+# Helioviewer application configuration
+RUN python3 -m pip install --user numpy sunpy matplotlib scipy glymur mysqlclient
+RUN useradd helioviewer
+USER helioviewer
 
-# Make sure the welcome message shows when user enters the console
-RUN sh /root/setup_files/scripts/show_motd.sh
+# Helioviewer installation
+COPY setup_files/scripts/crontab /home/helioviewer/.crontab
+RUN crontab /home/helioviewer/.crontab
+WORKDIR /tmp
+RUN curl --output api.zip -s -X GET https://codeload.github.com/Helioviewer-Project/api/zip/refs/heads/master
+RUN unzip -q api.zip
 
-# Copy sample data (so users don't need to provide
-# their own for the installation to work)
-COPY sample-data/* /root/
+COPY sample-data/2021.zip /tmp/jp2/2021.zip
+WORKDIR ${INSTALL_PATH}/setup_files/scripts
+USER root
+COPY setup_files ${INSTALL_PATH}/setup_files
+RUN mysqld --user=mysql -D; ./headless_install.sh; sh ${INSTALL_PATH}/setup_files/scripts/mysql_user_patch.sh
 
-RUN mkdir /root/log
-
-# Open container ports to the host
 EXPOSE 80
 EXPOSE 81
 
-# Set up mount points for the devleopment folders
-VOLUME /var/www/helioviewer.org
-VOLUME /var/www/api.helioviewer.org
+USER root
+RUN echo "helioviewer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers
+RUN mkdir -p /home/helioviewer/httpd
+RUN chmod +x /home/helioviewer
+RUN rm /etc/httpd/conf.d/welcome.conf
+# Set up server configuration
+COPY setup_files/server/helioviewer.conf /etc/httpd/conf.d/helioviewer.conf
+COPY setup_files/server/add_ports.sh ${INSTALL_PATH}/add_ports.sh
+COPY setup_files/server/my.cnf /etc/my.cnf.d/my.cnf
+RUN sh ${INSTALL_PATH}/add_ports.sh
 
-# Tell user what more they need to do to complete setup
-RUN
-
-
-WORKDIR /root/setup_files/scripts
-CMD [ "bash", "startup.sh" ]
+USER helioviewer
+WORKDIR /home/helioviewer
+CMD [ "sudo", "bash", "-c", "/root/.install/setup_files/scripts/startup.sh" ]

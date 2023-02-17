@@ -17,24 +17,24 @@ then
     mkdir log
 
     # Set up site config and create local directories
-    cp ~/setup_files/app_config/Config.js $SITE_DIR/resources/js/Utility/Config.js
-    cp ~/setup_files/app_config/settings.cfg $API_DIR/install/settings/settings.cfg
+    cp $INSTALL_DIR/setup_files/app_config/Config.js $SITE_DIR/resources/js/Utility/Config.js
+    cp $INSTALL_DIR/setup_files/app_config/settings.cfg $API_DIR/install/settings/settings.cfg
 
     mkdir -p $SITE_DIR/log $SITE_DIR/cache
-    chown www-data:www-data $SITE_DIR/log $SITE_DIR/cache
+    chown apache:apache $SITE_DIR/log $SITE_DIR/cache
 
     # Copy API configuration files
     if [ ! -f "$API_DIR/settings/Config.ini" ]
     then
-        cp ~/setup_files/app_config/Config.ini $API_DIR/settings/Config.ini
+        cp $INSTALL_DIR/setup_files/app_config/Config.ini $API_DIR/settings/Config.ini
     fi
 
     if [ ! -f "$API_DIR/settings/Private.php" ]
     then
-        cp ~/setup_files/app_config/Private.php $API_DIR/settings/Private.php
+        cp $INSTALL_DIR/setup_files/app_config/Private.php $API_DIR/settings/Private.php
     fi
 
-    ln -s /var/www/jp2 $API_DIR/docroot/jp2
+    ln -s /tmp/jp2 $API_DIR/docroot/jp2
 
     # Minify css/js
     cd $SITE_DIR/resources/build

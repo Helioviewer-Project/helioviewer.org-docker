@@ -1,8 +1,7 @@
-source vars.sh
+API_DIR=/tmp/api-master
 
-cd /root/
-unzip -qo 2021.zip -d /var/www/jp2
-rm 2021.zip
+cd /tmp/jp2
+unzip -qo 2021.zip
 
 # Set up Kakadu inside the api folder.
 cd $API_DIR/install/kakadu

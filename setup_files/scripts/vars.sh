@@ -1,2 +1,3 @@
-API_DIR=/var/www/api.helioviewer.org
-SITE_DIR=/var/www/helioviewer.org
+API_DIR=/home/helioviewer/api.helioviewer.org
+SITE_DIR=/home/helioviewer/helioviewer.org
+INSTALL_DIR=/root/.install

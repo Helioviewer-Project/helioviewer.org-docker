@@ -1,7 +1,7 @@
 function cleanup()
 {
-    service apache2 stop
-    service mysql stop
+    pkill httpd
+    pkill mysqld
     # redis and tcsh don't need graceful cleanup (I hope)
 
     echo "exited $0"
@@ -12,12 +12,14 @@ function cleanup()
 #     or need to start multiple services in the one container
 trap cleanup HUP INT QUIT TERM
 
+cd /root/.install/setup_files/scripts
 source first_time_run.sh
-service apache2 start
-service mysql start
+source vars.sh
+httpd
+mysqld --user=mysql -D
 redis-server --daemonize yes
 # Start up movie builder
-nohup tcsh /var/www/api.helioviewer.org/scripts/movie_queue.tcsh > /var/www/api.helioviewer.org/log/movie_builder.log
+nohup tcsh $API_DIR/scripts/movie_queue.tcsh > $API_DIR/log/movie_builder.log
 
 echo "Container up and running"
 read
