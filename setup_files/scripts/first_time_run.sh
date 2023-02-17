@@ -1,5 +1,6 @@
 # Define the lock file
-first_run=/root/setup_files/scripts/first_run.lock
+source vars.sh
+first_run=$INSTALL_DIR/setup_files/scripts/first_run.lock
 
 # if the lock file exists, then don't do anything
 if [ ! -f "$first_run" ]
@@ -11,17 +12,15 @@ then
     # Bring in script variabls like API_DIR and SITE_DIR
     source vars.sh
 
-    # Create api cache and log directories
-    cd $API_DIR
-    mkdir docroot/cache
-    mkdir log
+    # Create cache and log directories
+    mkdir -p $API_DIR/log $SITE_DIR/cache
+    chmod g+w $API_DIR/log $SITE_DIR/cache
+    sudo chown apache:helioviewer $API_DIR/log $SITE_DIR/cache
+    ln -s $API_DIR/log ~/error_logs
 
     # Set up site config and create local directories
     cp $INSTALL_DIR/setup_files/app_config/Config.js $SITE_DIR/resources/js/Utility/Config.js
     cp $INSTALL_DIR/setup_files/app_config/settings.cfg $API_DIR/install/settings/settings.cfg
-
-    mkdir -p $SITE_DIR/log $SITE_DIR/cache
-    chown apache:apache $SITE_DIR/log $SITE_DIR/cache
 
     # Copy API configuration files
     if [ ! -f "$API_DIR/settings/Config.ini" ]

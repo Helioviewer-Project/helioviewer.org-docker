@@ -10,7 +10,7 @@ expect "Username" { send "\r" }
 expect "Password" { send "\r" }
 expect "Database" { send "\r" }
 expect "Choice" { send "1\r" }
-expect "Username" { send "\r" }
+expect "Username" { send "root\r" }
 expect "Password" { send "\r" }
 
 expect eof
