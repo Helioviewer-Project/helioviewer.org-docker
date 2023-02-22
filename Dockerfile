@@ -19,7 +19,7 @@ RUN curl -s --output php8.tar.xz -X GET https://www.php.net/distributions/php-8.
     cd ${INSTALL_PATH}/php-8.2.3;                                                                \
     mkdir /etc/php.d; cp php.ini-development /etc/php.ini;                                        \
     ./configure --with-apxs2=/usr/bin/apxs --with-curl --enable-pcntl --with-openssl --with-pear \
-                --with-mysqli --with-readline --enable-fpm --enable-phpdbg --without-iconv       \
+                --with-mysqli --with-readline --enable-phpdbg --without-iconv       \
                 --without-sqlite3 --without-pdo-sqlite --with-config-file-path=/etc              \
                 --with-config-file-scan-dir=/etc/php.d;                                          \
     make;                                                                                        \
@@ -77,9 +77,9 @@ USER helioviewer
 COPY --chown=helioviewer:helioviewer setup_files /home/helioviewer/setup_files
 RUN curl --output api.zip -s -X GET https://codeload.github.com/Helioviewer-Project/api/zip/refs/heads/master; \
    unzip -q api.zip;\
-   python3 -m pip install --user -r /tmp/api-master/docs/src/requirements.txt \
-   python3 -m pip install --user -r /tmp/api-master/scripts/availability_feed/requirements.txt \
-   python3 -m pip install --user -r /tmp/api-master/scripts/hv_stats/requirements.txt \
+   python3 -m pip install --user -r /tmp/api-master/docs/src/requirements.txt; \
+   python3 -m pip install --user -r /tmp/api-master/scripts/availability_feed/requirements.txt; \
+   python3 -m pip install --user -r /tmp/api-master/scripts/hv_stats/requirements.txt; \
    cd /home/helioviewer/setup_files/scripts; \
    sudo mysqld --user=mysql -D; ./headless_setup.sh; \
    rm -rf /tmp/api.zip /tmp/api-master; \
