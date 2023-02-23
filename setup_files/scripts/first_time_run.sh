@@ -15,6 +15,7 @@ then
     # Create cache and log directories
     mkdir -p $API_DIR/log $SITE_DIR/cache
     chmod g+w $API_DIR/log $SITE_DIR/cache
+    ln -s $SITE_DIR/cache $API_DIR/docroot/cache
     sudo chown apache:helioviewer $API_DIR/log $SITE_DIR/cache
     ln -s $API_DIR/log ~/error_logs
 
