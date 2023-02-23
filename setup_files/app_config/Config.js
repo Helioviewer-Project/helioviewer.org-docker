@@ -24,7 +24,7 @@ var Config = Class.extend(
         'prefetch_size'             : 0,
         'news_url'                  : "https://helioviewer-project.github.io/",
         'user_video_feed'           : "http://localhost:8081/",
-        'contact_email'             : "you@are_the.contact",
+        'contact_email'             : "HelioViewerDevelopment@nasa.onmicrosoft.com",
         'regenerate_movie_threshold': 90,
         'enable_helios_backlinks'   : false
      },
