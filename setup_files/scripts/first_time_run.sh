@@ -41,6 +41,10 @@ then
     chmod +x jsmin/jsmin.py # workaround for now
     ant
 
+    # Install PHP packages with composer
+    cd $API_DIR
+    composer install
+
     # Create lock file so this script does not do anything on future runs
     touch $first_run
 fi

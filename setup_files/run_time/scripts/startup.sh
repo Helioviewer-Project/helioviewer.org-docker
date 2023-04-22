@@ -19,10 +19,6 @@ sudo mysqld --user=mysql -D
 redis-server --daemonize yes
 # Start up movie builder
 nohup tcsh $API_DIR/scripts/movie_queue.tcsh > $API_DIR/log/movie_builder.log
-cd /home/helioviewer/api.helioviewer.org/vendor/bin
-pkill -f "/tmp/hgs2hpc_venv/bin/python"
-rm -f /tmp/hgs2hpc.sock
-./start_hgs2hpc
 
 echo "Container up and running"
 read

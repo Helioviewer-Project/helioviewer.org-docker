@@ -73,13 +73,13 @@ RUN unzip 2021.zip
 WORKDIR /tmp
 USER helioviewer
 COPY --chown=helioviewer:helioviewer setup_files /home/helioviewer/setup_files
-RUN curl --output api.zip -s -X GET https://codeload.github.com/dgarciabriseno/api/zip/refs/heads/redo-scoreboard  && \
-    unzip -q api.zip && mv api-redo-scoreboard api-master &&                                                          \
-    python3 -m pip install --user -r /tmp/api-master/docs/src/requirements.txt &&                                     \
-    python3 -m pip install --user -r /tmp/api-master/scripts/availability_feed/requirements.txt &&                    \
-    python3 -m pip install --user -r /tmp/api-master/scripts/hv_stats/requirements.txt &&                             \
-    cd /home/helioviewer/setup_files/scripts &&                                                                       \
-    sudo mysqld --user=mysql -D && ./headless_setup.sh &&                                                             \
+RUN curl --output api.zip -s -X GET https://codeload.github.com/Helioviewer-Project/api/zip/refs/heads/master && \
+    unzip -q api.zip &&                                                                                          \
+    python3 -m pip install --user -r /tmp/api-master/docs/src/requirements.txt &&                                    \
+    python3 -m pip install --user -r /tmp/api-master/scripts/availability_feed/requirements.txt &&                   \
+    cd /home/helioviewer/setup_files/scripts &&                                                                  \
+    sudo mysqld --user=mysql -D && ./headless_setup.sh &&                                                        \
+    cd /tmp/api-master/install/database && sudo mysql helioviewer < 2023_04_11_update_flare_table.sql &&                     \
     rm -rf /tmp/api.zip /tmp/api-master &&                                                                            \
     sudo pkill mysqld
 
@@ -92,10 +92,21 @@ RUN mkdir -p /home/helioviewer/httpd &&       \
     sudo rm /etc/httpd/conf.d/welcome.conf && \
     sudo sh ${INSTALL_PATH}/add_ports.sh
 
+# enable npm and composer
+USER root
+RUN curl -q -X GET https://raw.githubusercontent.com/composer/getcomposer.org/76a7060ccb93902cd7576b67264ad91c8a2700e2/web/installer | php && \
+    mv composer.phar /usr/bin/composer &&                                                                                                     \
+    curl -X GET --output node.tar.xz https://nodejs.org/dist/v18.16.0/node-v18.16.0-linux-x64.tar.xz &&                                       \
+    tar xf node.tar.xz &&                                                                                                                     \
+    cd node-v18.16.0-linux-x64/bin &&                                                                                                         \
+    ln -s $PWD/* /usr/bin &&                                                                                                                  \
+    cd ../.. && rm -rf node.tar.xz
+
 USER helioviewer
 COPY setup_files/scripts/crontab /home/helioviewer/.crontab
 RUN crontab /home/helioviewer/.crontab
 WORKDIR /home/helioviewer
+
 
 EXPOSE 80
 EXPOSE 81
