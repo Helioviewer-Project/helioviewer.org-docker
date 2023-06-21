@@ -24,7 +24,7 @@ jobs:
         with:
           images: dgarciabriseno/helioviewer.org
           tags: |
-            type=ref
+            type=ref,event=tag
             type=semver,pattern={{version}}
 
       - name: Build and push Docker image
