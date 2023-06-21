@@ -23,7 +23,7 @@ RUN curl -s --output php8.tar.xz -X GET https://www.php.net/distributions/php-8.
                 --enable-mbstring --enable-bcmath                                                  \
                 --without-sqlite3 --without-pdo-sqlite --with-config-file-path=/etc                \
                 --with-config-file-scan-dir=/etc/php.d &&                                          \
-    make -j 4 &&                                                                                   \
+    make -j$(nproc) &&                                                                             \
     make install &&                                                                                \
     cd ${INSTALL_PATH} &&                                                                          \
     rm -rf php-8.2.3 &&                                                                            \
@@ -54,7 +54,7 @@ RUN dnf install -y freetype-devel
 RUN curl -s --output imagemagick.zip -X GET https://codeload.github.com/ImageMagick/ImageMagick6/zip/refs/tags/6.9.12-70 && \
     unzip imagemagick.zip &&                                                                                                \
     cd ${INSTALL_PATH}/ImageMagick6-6.9.12-70 &&                                                                            \
-    ./configure && make -j 8 && make install &&                                                                             \
+    ./configure && make -j$(nproc) && make install &&                                                                             \
     yes '' | pecl install imagick &&                                                                                        \
     rm -rf ${INSTALL_PATH}/ImageMagick6-6.9.12-70
 
