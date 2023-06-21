@@ -20,7 +20,7 @@ RUN curl -s --output php8.tar.xz -X GET https://www.php.net/distributions/php-8.
     mkdir /etc/php.d && cp php.ini-development /etc/php.ini &&                                     \
     ./configure --with-apxs2=/usr/bin/apxs --with-curl --enable-pcntl --with-openssl --with-pear   \
                 --with-mysqli --with-readline --enable-phpdbg --without-iconv --enable-sockets     \
-                --enable-mbstring                                                                  \
+                --enable-mbstring --enable-bcmath                                                  \
                 --without-sqlite3 --without-pdo-sqlite --with-config-file-path=/etc                \
                 --with-config-file-scan-dir=/etc/php.d &&                                          \
     make -j 4 &&                                                                                   \
