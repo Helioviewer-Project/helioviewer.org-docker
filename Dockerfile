@@ -78,12 +78,11 @@ USER helioviewer
 COPY --chown=helioviewer:helioviewer setup_files /home/helioviewer/setup_files
 RUN curl --output api.zip -s -X GET https://codeload.github.com/Helioviewer-Project/api/zip/refs/heads/master && \
     unzip -q api.zip &&                                                                                          \
-    python3 -m pip install --user -r /tmp/api-master/docs/src/requirements.txt &&                                    \
-    python3 -m pip install --user -r /tmp/api-master/scripts/availability_feed/requirements.txt &&                   \
+    python3 -m pip install --user -r /tmp/api-master/docs/src/requirements.txt &&                                \
+    python3 -m pip install --user -r /tmp/api-master/scripts/availability_feed/requirements.txt &&               \
     cd /home/helioviewer/setup_files/scripts &&                                                                  \
     sudo mysqld --user=mysql -D && ./headless_setup.sh &&                                                        \
-    cd /tmp/api-master/install/database && sudo mysql helioviewer < 2023_04_11_update_flare_table.sql &&                     \
-    rm -rf /tmp/api.zip /tmp/api-master &&                                                                            \
+    rm -rf /tmp/api.zip /tmp/api-master &&                                                                       \
     sudo pkill mysqld
 
 # Set up server configuration
