@@ -23,6 +23,9 @@ RUN curl -s --output php8.tar.xz -X GET https://www.php.net/distributions/php-8.
                 --enable-mbstring --enable-bcmath                                                  \
                 --without-sqlite3 --without-pdo-sqlite --with-config-file-path=/etc                \
                 --with-config-file-scan-dir=/etc/php.d &&                                          \
+    echo -------------------------------- &&                                                       \
+    echo Compiling with $(nproc) threads  &&                                                       \
+    echo -------------------------------- &&                                                       \
     make -j$(nproc) &&                                                                             \
     make install &&                                                                                \
     cd ${INSTALL_PATH} &&                                                                          \
