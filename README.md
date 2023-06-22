@@ -35,3 +35,26 @@ For vscode, install the PHP Debug extension provided by xdebug and use the follo
     }
 }
 ```
+
+# Troubleshooting
+If the helioviewer isn't loading for you, here are the first things to check.
+
+## Submodules
+The `helioviewer.org` repository relies on some submodules.
+Make sure to run `git submodule update --init --recursive --remote` in the helioviewer.org repository.
+
+## Bad configuration
+On a clean setup, the container installs its own `Config.ini` and `Private.php` in `api/settings`, and `Config.js` in `helioviewer.org/resources/js/Utility`.
+
+If you have modified these at all, then the container won't overwrite your own configuration, but it can lead to issues in the container.
+Use the configurations [here](https://github.com/Helioviewer-Project/helioviewer.org-docker/tree/main/setup_files/app_config).
+
+## Services not running
+For simplicity, the single container runs all required services including:
+- redis
+- mysql
+- httpd
+- helioviewer specific background jobs
+
+Most of these get started automatically when you start the container, but sometimes if the container doesn't shutdown properly (i.e. due to a sudden system shutdown), then they might not start up automatically on the next run.
+You can check that these services are running and start them manually or just delete the container and start again.
