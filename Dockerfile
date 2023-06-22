@@ -24,9 +24,9 @@ RUN curl -s --output php8.tar.xz -X GET https://www.php.net/distributions/php-8.
                 --without-sqlite3 --without-pdo-sqlite --with-config-file-path=/etc                \
                 --with-config-file-scan-dir=/etc/php.d &&                                          \
     echo -------------------------------- &&                                                       \
-    echo Compiling with $(nproc) threads  &&                                                       \
+    echo Compiling with $((`nproc` + 1)) threads  &&                                                       \
     echo -------------------------------- &&                                                       \
-    make -j$(nproc) &&                                                                             \
+    make -j$((`nproc` + 1)) &&                                                                             \
     make install &&                                                                                \
     cd ${INSTALL_PATH} &&                                                                          \
     rm -rf php-8.2.3 &&                                                                            \
@@ -57,7 +57,7 @@ RUN dnf install -y freetype-devel
 RUN curl -s --output imagemagick.zip -X GET https://codeload.github.com/ImageMagick/ImageMagick6/zip/refs/tags/6.9.12-70 && \
     unzip imagemagick.zip &&                                                                                                \
     cd ${INSTALL_PATH}/ImageMagick6-6.9.12-70 &&                                                                            \
-    ./configure && make -j$(nproc) && make install &&                                                                             \
+    ./configure && make -j$((`nproc` + 1)) && make install &&                                                                             \
     yes '' | pecl install imagick &&                                                                                        \
     rm -rf ${INSTALL_PATH}/ImageMagick6-6.9.12-70
 
