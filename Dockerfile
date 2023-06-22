@@ -87,9 +87,9 @@ RUN curl --output api.zip -s -X GET https://codeload.github.com/Helioviewer-Proj
     sudo pkill mysqld
 
 # Set up server configuration
-COPY setup_file/container_config/helioviewer.conf /etc/httpd/conf.d/helioviewer.conf
-COPY setup_file/container_config/add_ports.sh ${INSTALL_PATH}/add_ports.sh
-COPY setup_file/container_config/my.cnf /etc/my.cnf.d/my.cnf
+COPY setup_files/container_config/helioviewer.conf /etc/httpd/conf.d/helioviewer.conf
+COPY setup_files/container_config/add_ports.sh ${INSTALL_PATH}/add_ports.sh
+COPY setup_files/container_config/my.cnf /etc/my.cnf.d/my.cnf
 RUN mkdir -p /home/helioviewer/httpd &&       \
     sudo chmod +x /home/helioviewer &&        \
     sudo rm /etc/httpd/conf.d/welcome.conf && \
