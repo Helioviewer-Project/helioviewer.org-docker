@@ -37,7 +37,7 @@ RUN echo $'<FilesMatch \.php$>\nSetHandler application/x-httpd-php\n</FilesMatch
     echo "DirectoryIndex index.html index.php" > /etc/httpd/conf.modules.d/30-indexes.conf &&                                 \
     echo "extension=redis.so" > /etc/php.d/99-redis.ini &&                                                                       \
     echo "extension=imagick.so" > /etc/php.d/99-imagick.ini &&                                                                   \
-    echo "zend_extension=xdebug.so\nxdebug.client_host=host.docker.internal\nxdebug.mode=debug" > /etc/php.d/99-xdebug.ini &&    \
+    echo -e "zend_extension=xdebug.so\nxdebug.client_host=host.docker.internal\nxdebug.mode=debug" > /etc/php.d/99-xdebug.ini &&    \
     echo "helioviewer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers &&                                                              \
     echo "export LD_LIBRARY_PATH=/usr/local/lib" >> /etc/bashrc &&                                                            \
     echo '!includedir /etc/my.cnf.d' >> /etc/my.cnf &&                                                                        \
