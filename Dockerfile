@@ -33,17 +33,18 @@ RUN curl -s --output php8.tar.xz -X GET https://www.php.net/distributions/php-8.
     rm -rf php8.tar.xz
 
 # Echo all necessary files here
+COPY setup_files/container_config/99-xdebug.ini /etc/php.d/99-xdebug.ini
 RUN echo $'<FilesMatch \.php$>\nSetHandler application/x-httpd-php\n</FilesMatch>' > /etc/httpd/conf.modules.d/20-php.conf && \
     echo "DirectoryIndex index.html index.php" > /etc/httpd/conf.modules.d/30-indexes.conf &&                                 \
-    echo "extension=redis.so" > /etc/php.d/redis.ini &&                                                                       \
-    echo "extension=imagick.so" > /etc/php.d/imagick.ini &&                                                                   \
+    echo "extension=redis.so" > /etc/php.d/99-redis.ini &&                                                                    \
+    echo "extension=imagick.so" > /etc/php.d/99-imagick.ini &&                                                                \
     echo "helioviewer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers &&                                                              \
     echo "export LD_LIBRARY_PATH=/usr/local/lib" >> /etc/bashrc &&                                                            \
     echo '!includedir /etc/my.cnf.d' >> /etc/my.cnf &&                                                                        \
     touch /tmp/sdo-backfill.log /tmp/sdo-monthly.log /tmp/rob-backfill.log /tmp/rob-monthly.log /tmp/soho-backfill.log /tmp/soho-monthly.log /tmp/stereo-backfill.log /tmp/stereo-monthly.log
 
-# Need to install pecl redis somewhere, but no good place to put it.
-RUN yes '' | pecl install redis
+# Install redis-php add-ons and xdebug
+RUN yes '' | pecl install redis && pecl install xdebug
 
 # Get ffmpeg for making videos
 RUN curl -s --output ffmpeg.tar.xz -X GET https://www.johnvansickle.com/ffmpeg/old-releases/ffmpeg-5.1.1-amd64-static.tar.xz && \
@@ -86,9 +87,9 @@ RUN curl --output api.zip -s -X GET https://codeload.github.com/Helioviewer-Proj
     sudo pkill mysqld
 
 # Set up server configuration
-COPY setup_files/server/helioviewer.conf /etc/httpd/conf.d/helioviewer.conf
-COPY setup_files/server/add_ports.sh ${INSTALL_PATH}/add_ports.sh
-COPY setup_files/server/my.cnf /etc/my.cnf.d/my.cnf
+COPY setup_files/container_config/helioviewer.conf /etc/httpd/conf.d/helioviewer.conf
+COPY setup_files/container_config/add_ports.sh ${INSTALL_PATH}/add_ports.sh
+COPY setup_files/container_config/my.cnf /etc/my.cnf.d/my.cnf
 RUN mkdir -p /home/helioviewer/httpd &&       \
     sudo chmod +x /home/helioviewer &&        \
     sudo rm /etc/httpd/conf.d/welcome.conf && \
@@ -110,7 +111,9 @@ RUN crontab /home/helioviewer/.crontab
 WORKDIR /home/helioviewer
 
 
+# Web server port
 EXPOSE 80
+# API server port
 EXPOSE 81
 
 CMD [ "bash", "-c", "/home/helioviewer/setup_files/scripts/startup.sh" ]

@@ -5,6 +5,7 @@ on: workflow_dispatch
 jobs:
   push_to_registry:
     name: Push image to Docker Hub
+    environment: builder
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -20,7 +21,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE }}
+          images: ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_IMAGE }}
           tags: type=ref,event=branch
 
       - name: Build and push Docker image
