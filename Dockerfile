@@ -70,7 +70,7 @@ RUN mysqld --initialize-insecure
 USER root
 RUN useradd helioviewer -m -s /bin/bash && cp /etc/skel/.bash* /home/helioviewer && chown helioviewer:helioviewer /home/helioviewer
 USER helioviewer
-RUN python3 -m pip install --user numpy sunpy matplotlib scipy glymur mysqlclient
+RUN python3 -m pip install --user numpy sunpy matplotlib scipy glymur mysqlclient pytest
 COPY --chown=helioviewer:helioviewer sample-data/2021.zip /tmp/jp2/2021.zip
 WORKDIR /tmp/jp2
 RUN unzip 2021.zip
