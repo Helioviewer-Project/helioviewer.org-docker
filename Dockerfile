@@ -35,9 +35,9 @@ RUN curl -s --output php8.tar.xz -X GET https://www.php.net/distributions/php-8.
 # Echo all necessary files here
 RUN echo $'<FilesMatch \.php$>\nSetHandler application/x-httpd-php\n</FilesMatch>' > /etc/httpd/conf.modules.d/20-php.conf && \
     echo "DirectoryIndex index.html index.php" > /etc/httpd/conf.modules.d/30-indexes.conf &&                                 \
-    echo "extension=redis.so" > /etc/php.d/99-redis.ini &&                                                                       \
-    echo "extension=imagick.so" > /etc/php.d/99-imagick.ini &&                                                                   \
-    echo -e "zend_extension=xdebug.so\nxdebug.client_host=host.docker.internal\nxdebug.mode=debug" > /etc/php.d/99-xdebug.ini &&    \
+    echo "extension=redis.so" > /etc/php.d/99-redis.ini &&                                                                    \
+    echo "extension=imagick.so" > /etc/php.d/99-imagick.ini &&                                                                \
+    echo -e "zend_extension=xdebug.so\nxdebug.client_host=host.docker.internal\nxdebug.mode=debug\nxdebug.start_with_request=yes" > /etc/php.d/99-xdebug.ini && \
     echo "helioviewer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers &&                                                              \
     echo "export LD_LIBRARY_PATH=/usr/local/lib" >> /etc/bashrc &&                                                            \
     echo '!includedir /etc/my.cnf.d' >> /etc/my.cnf &&                                                                        \
