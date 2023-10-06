@@ -1,4 +1,8 @@
 FROM oraclelinux:8
+
+ENV GITHUB_USERNAME=dgarciabriseno
+ENV GITHUB_BRANCH=master
+
 ENV INSTALL_PATH=/root/.install
 # Group all heliovewer dependencies into one DNF download
 WORKDIR ${INSTALL_PATH}
@@ -77,13 +81,13 @@ RUN unzip 2021.zip
 WORKDIR /tmp
 USER helioviewer
 COPY --chown=helioviewer:helioviewer setup_files /home/helioviewer/setup_files
-RUN curl --output api.zip -s -X GET https://codeload.github.com/Helioviewer-Project/api/zip/refs/heads/master && \
+RUN curl --output api.zip -s -X GET https://codeload.github.com/$GITHUB_USERNAME/api/zip/refs/heads/$GITHUB_BRANCH && \
     unzip -q api.zip &&                                                                                          \
-    python3 -m pip install --user -r /tmp/api-master/docs/src/requirements.txt &&                                \
-    python3 -m pip install --user -r /tmp/api-master/scripts/availability_feed/requirements.txt &&               \
+    python3 -m pip install --user -r /tmp/api-$GITHUB_BRANCH/docs/src/requirements.txt &&                                \
+    python3 -m pip install --user -r /tmp/api-$GITHUB_BRANCH/scripts/availability_feed/requirements.txt &&               \
     cd /home/helioviewer/setup_files/scripts &&                                                                  \
     sudo mysqld --user=mysql -D && ./headless_setup.sh &&                                                        \
-    rm -rf /tmp/api.zip /tmp/api-master &&                                                                       \
+    rm -rf /tmp/api.zip /tmp/api-$GITHUB_BRANCH &&                                                                       \
     sudo pkill mysqld
 
 # Set up server configuration
