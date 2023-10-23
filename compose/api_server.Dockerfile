@@ -11,7 +11,8 @@ RUN apt update                                                                  
     && rm -rf ImageMagick6-6.9.12-70                                                                                        \
     && docker-php-ext-configure mysqli                                                                                      \
     && docker-php-ext-configure sockets                                                                                     \
-    && docker-php-ext-install -j$(nproc) mysqli sockets                                                                     \
+    && docker-php-ext-configure bcmath                                                                                      \
+    && docker-php-ext-install -j$(nproc) mysqli sockets bcmath                                                              \
     && pecl install redis                                                                                                   \
     && pecl install xdebug                                                                                                  \
     && pecl install imagick                                                                                                 \
