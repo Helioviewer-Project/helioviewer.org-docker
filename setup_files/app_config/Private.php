@@ -7,7 +7,7 @@
 /**
 * Database Information
 */
-define("HV_DB_HOST", "127.0.0.1");
+define("HV_DB_HOST", "database");
 define("HV_DB_NAME", "helioviewer");
 define("HV_DB_USER", "helioviewer");
 define("HV_DB_PASS", "helioviewer");
@@ -16,7 +16,7 @@ define("HV_DB_PASS", "helioviewer");
  * Redis Database Information
  * Used for rate-limiting
  */
-define("HV_REDIS_HOST","127.0.0.1");
+define("HV_REDIS_HOST","redis");
 define("HV_REDIS_PORT",6379);
 
 /**

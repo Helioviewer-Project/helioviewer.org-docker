@@ -1,0 +1,76 @@
+name: helioviewer
+services:
+  database:
+    image: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: helioviewer
+    ports:
+      - 3306:3306
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "bash", "/usr/local/bin/healthcheck.sh", "--connect"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    restart: on-failure
+  api_server:
+    build:
+      dockerfile: ./compose/api_server.Dockerfile
+    ports:
+      - 8081:80
+    depends_on:
+      - database
+      - redis
+    restart: on-failure
+    platform: linux/amd64
+    volumes:
+      - type: volume
+        source: jp2_volume
+        target: /tmp/jp2
+      - cache:/var/www/helioviewer.org/cache
+      - type: bind
+        source: ./api
+        target: /var/www/api.helioviewer.org
+  web_server:
+    build:
+      dockerfile: ./compose/webserver.Dockerfile
+    ports:
+      - 8080:80
+    depends_on:
+      - api_server
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./helioviewer.org
+        target: /var/www/html
+      - type: bind
+        source: ./api
+        target: /var/www/api.helioviewer.org
+      - type: bind
+        source: ./setup_files/app_config
+        target: /var/www/api.helioviewer.org/settings
+      - cache:/var/www/html/cache
+  cli:
+    build:
+      dockerfile: ./compose/cli.Dockerfile
+    depends_on:
+      database:
+        condition: service_healthy
+      api_server:
+        condition: service_started
+    platform: linux/amd64
+    volumes:
+      - type: volume
+        source: jp2_volume
+        target: /tmp/jp2
+      - type: bind
+        source: ./api
+        target: /root/api
+
+volumes:
+  jp2_volume:
+  cache:
