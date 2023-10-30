@@ -1,20 +1,19 @@
-# HelioViewer Docker
-This repo provides a containerized development environment for working with HelioViewer
+# Helioviewer Docker
+This repo provides a containerized development environment for working with Helioviewer
 
 # Usage
-To run the dev environment:
+To run the dev environment, install [Docker](https://docs.docker.com/get-docker/)
 
-- checkout the [api](https://github.com/Helioviewer-Project/api)
-- checkout tho [app](https://github.com/Helioviewer-Project/helioviewer.org) repositories.
-- In the app repository, get submodules with `git submodule update --init --recursive --remote`
-- Run the following:
+Once installed clone this repo and run docker compose:
+
+```bash
+git clone --recurse-submodules https://github.com/Helioviewer-Project/helioviewer.org-docker.git
+cd helioviewer.org-docker
+docker compose up
 ```
-docker run -p 127.0.0.1:8080:80 -p 127.0.0.1:8081:81 -v "$PWD/api:/home/helioviewer/api.helioviewer.org" -v "$PWD/helioviewer.org:/home/helioviewer/helioviewer.org" -d -t dgarciabriseno/helioviewer.org
-```
 
-The important thing to note about the above command is that ports 8080 and 8081 are exposed, and that the api and helioviewer.org repositories are mounted in the container.
-
-Now wait for the container to startup the server and then you can access the site by going to http://localhost:8080/
+It may take a while for the containers to be built and the application to start up.
+Once the output from docker settles down, check that it's running by going to http://localhost:8080/
 
 ## Debugging
 The container has xdebug configured for debugging.
