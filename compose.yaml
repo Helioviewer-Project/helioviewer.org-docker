@@ -36,6 +36,7 @@ services:
       - type: bind
         source: ./api
         target: /var/www/api.helioviewer.org
+      - api_logs:/var/www/api.helioviewer.org/log
   web:
     build:
       dockerfile: ./compose/dockerfiles/webserver.Dockerfile
@@ -82,3 +83,4 @@ services:
 volumes:
   jp2_volume:
   cache:
+  api_logs:
