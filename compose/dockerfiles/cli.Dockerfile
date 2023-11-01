@@ -1,8 +1,8 @@
 FROM alpine
 WORKDIR /root
 COPY ./compose/2021_06_01__00_01_29_132__SDO_AIA_AIA_304.jp2 /root
-COPY ./compose/cli_start.sh /root
-COPY ./compose/headless_setup.sh /root
+COPY ./compose/scripts/cli_start.sh /root
+COPY ./compose/scripts/headless_setup.sh /root
 
 RUN apk update                                                           \
     && apk add --virtual build-deps gcc python3-dev musl-dev             \

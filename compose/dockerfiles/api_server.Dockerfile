@@ -31,7 +31,7 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
 COPY ./compose/99-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
-COPY ./compose/api_startup.sh /root
+COPY ./compose/scripts/api_startup.sh /root
 WORKDIR /var/www/api.helioviewer.org
 ENTRYPOINT ["bash", "/root/api_startup.sh"]
 # ENTRYPOINT ["tail", "-F", "/dev/null"]
