@@ -54,7 +54,7 @@ services:
         source: ./api
         target: /var/www/api.helioviewer.org
       - type: bind
-        source: ./setup_files/app_config
+        source: ./compose/app_config
         target: /var/www/api.helioviewer.org/settings
       - cache:/var/www/html/cache
   movies:
@@ -70,7 +70,7 @@ services:
             && mv /usr/bin/resque /usr/bin/_resque \
             && echo '_resque -r redis $@' > /usr/bin/resque \
             && chmod +x /usr/bin/resque
-        COPY setup_files/container_config/99-xdebug.ini /etc/php81/conf.d/50_xdebug.ini
+        COPY ./compose/99-xdebug.ini /etc/php81/conf.d/50_xdebug.ini
         COPY api/install/kakadu/Kakadu_v6_4_1-00781N_Linux-64-bit-Compiled.tar.gz /kakadu/kdu.tar.gz
         WORKDIR /kakadu
         RUN tar xzf kdu.tar.gz          \
@@ -93,8 +93,6 @@ services:
     depends_on:
       database:
         condition: service_healthy
-      api_server:
-        condition: service_started
     platform: linux/x86_64
     volumes:
       - type: volume

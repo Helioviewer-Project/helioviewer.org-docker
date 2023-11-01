@@ -1,1 +1,0 @@
-*/10 * * * * python3 /root/setup_files/scripts/delete_data.py -c /root/setup_files/scripts/creds.ini -d /var/www/jp2 --days 1 >> /root/setup_files/file_removal_log.log

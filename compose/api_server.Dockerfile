@@ -29,7 +29,7 @@ ENV APACHE_DOCUMENT_ROOT /var/www/api.helioviewer.org/docroot
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-COPY setup_files/container_config/99-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+COPY ./compose/99-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 COPY ./compose/api_startup.sh /root
 WORKDIR /var/www/api.helioviewer.org
