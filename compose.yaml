@@ -18,7 +18,6 @@ services:
       - 6379:6379
     restart: on-failure
   api:
-    image: helioviewer-api
     build:
       dockerfile: ./compose/dockerfiles/api_server.Dockerfile
     ports:
@@ -38,7 +37,6 @@ services:
         source: ./api
         target: /var/www/api.helioviewer.org
   web:
-    image: helioviewer-web
     build:
       dockerfile: ./compose/dockerfiles/webserver.Dockerfile
     ports:
@@ -60,7 +58,6 @@ services:
   movies:
     depends_on:
       - redis
-    image: helioviewer-movie
     build:
       dockerfile: ./compose/dockerfiles/movie_builder.Dockerfile
     platform: linux/x86_64
@@ -71,7 +68,6 @@ services:
       - jp2_volume:/tmp/jp2
       - cache:/var/www/helioviewer.org/cache
   cli:
-    image: helioviewer-cli
     build:
       dockerfile: ./compose/dockerfiles/cli.Dockerfile
     depends_on:

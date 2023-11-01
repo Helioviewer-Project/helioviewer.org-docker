@@ -40,6 +40,7 @@ COPY ./compose/scripts/install_composer.sh /root
 RUN bash /root/install_composer.sh
 
 # Copy the startup script over.
+COPY ./compose/scripts/api_config.sh /root
 COPY ./compose/scripts/api_startup.sh /root
 WORKDIR /var/www/api.helioviewer.org
 ENTRYPOINT ["bash", "/root/api_startup.sh"]
