@@ -20,7 +20,7 @@ services:
   api:
     image: helioviewer-api
     build:
-      dockerfile: ./compose/api_server.Dockerfile
+      dockerfile: ./compose/dockerfiles/api_server.Dockerfile
     ports:
       - 8081:80
     depends_on:
@@ -40,7 +40,7 @@ services:
   web:
     image: helioviewer-web
     build:
-      dockerfile: ./compose/webserver.Dockerfile
+      dockerfile: ./compose/dockerfiles/webserver.Dockerfile
     ports:
       - 8080:80
     depends_on:
@@ -62,23 +62,7 @@ services:
       - redis
     image: helioviewer-movie
     build:
-      context: .
-      dockerfile_inline: |
-        FROM alpine
-        RUN apk add --no-cache gcompat tcsh php php-pcntl php-bcmath php-mysqli php-simplexml php81-pecl-imagick php81-pecl-redis php81-pecl-xdebug ruby ffmpeg \
-            && gem install resque            \
-            && mv /usr/bin/resque /usr/bin/_resque \
-            && echo '_resque -r redis $@' > /usr/bin/resque \
-            && chmod +x /usr/bin/resque
-        COPY ./compose/99-xdebug.ini /etc/php81/conf.d/50_xdebug.ini
-        COPY api/install/kakadu/Kakadu_v6_4_1-00781N_Linux-64-bit-Compiled.tar.gz /kakadu/kdu.tar.gz
-        WORKDIR /kakadu
-        RUN tar xzf kdu.tar.gz          \
-            && mv bin/* /usr/local/bin  \
-            && mv lib/* /usr/lib        \
-            && rm -r bin lib
-        WORKDIR /var/www/api.helioviewer.org/scripts
-        CMD REDIS_BACKEND=redis:6379 tcsh movie_queue.tcsh && tail -F /dev/null
+      dockerfile: ./compose/dockerfiles/movie_builder.Dockerfile
     platform: linux/x86_64
     volumes:
       - type: bind
@@ -89,7 +73,7 @@ services:
   cli:
     image: helioviewer-cli
     build:
-      dockerfile: ./compose/cli.Dockerfile
+      dockerfile: ./compose/dockerfiles/cli.Dockerfile
     depends_on:
       database:
         condition: service_healthy
