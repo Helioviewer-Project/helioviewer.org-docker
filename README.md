@@ -45,8 +45,7 @@ Make sure to run `git submodule update --init --recursive --remote` in the helio
 ## Bad configuration
 On a clean setup, the container installs its own `Config.ini` and `Private.php` in `api/settings`, and `Config.js` in `helioviewer.org/resources/js/Utility`.
 
-If you have modified these at all, then the container won't overwrite your own configuration, but it can lead to issues in the container.
-Use the configurations [here](https://github.com/Helioviewer-Project/helioviewer.org-docker/tree/main/setup_files/app_config).
+Double check these files if you're getting strange errors.
 
 ## Services not running
 For simplicity, the single container runs all required services including:

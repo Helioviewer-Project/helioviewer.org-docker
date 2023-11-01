@@ -51,9 +51,6 @@ services:
       - type: bind
         source: ./api
         target: /var/www/api.helioviewer.org
-      - type: bind
-        source: ./compose/app_config
-        target: /var/www/api.helioviewer.org/settings
       - cache:/var/www/html/cache
   movies:
     depends_on:
