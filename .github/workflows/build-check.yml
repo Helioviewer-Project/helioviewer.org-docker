@@ -1,6 +1,8 @@
-name: Build check for PR
+name: Build check
 
 on:
+  push:
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -9,7 +11,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
       - uses: isbang/compose-action@v1.5.1
         with:
           compose-file: "./compose.yaml"
