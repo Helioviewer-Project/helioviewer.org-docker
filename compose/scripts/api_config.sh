@@ -3,6 +3,7 @@ set -e
 
 SETTINGS_DIR=/var/www/api.helioviewer.org/settings
 sed "s|/var/www-api|/var/www/api.helioviewer.org|" ${SETTINGS_DIR}/Config.Example.ini > ${SETTINGS_DIR}/Config.ini
+sed -i "s|/var/www/api.helioviewer.org/docroot/cache|/var/www/helioviewer.org/cache|" ${SETTINGS_DIR}/Config.ini
 sed -i "s|/var/www/api.helioviewer.org/docroot/jp2|/tmp/jp2|" ${SETTINGS_DIR}/Config.ini
 
 echo "acao_url[] = http://localhost:8080" >> ${SETTINGS_DIR}/Config.ini
