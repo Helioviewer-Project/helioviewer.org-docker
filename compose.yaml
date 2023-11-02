@@ -1,0 +1,86 @@
+name: helioviewer
+services:
+  database:
+    image: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: helioviewer
+    ports:
+      - 3306:3306
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "bash", "/usr/local/bin/healthcheck.sh", "--connect"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    restart: on-failure
+  api:
+    build:
+      dockerfile: ./compose/dockerfiles/api_server.Dockerfile
+    ports:
+      - 8081:80
+    depends_on:
+      - database
+      - redis
+    restart: on-failure
+    platform: linux/amd64
+    volumes:
+      - type: volume
+        source: jp2_volume
+        target: /tmp/jp2
+      - cache:/var/www/helioviewer.org/cache
+      - cache:/var/www/api.helioviewer.org/docroot/cache
+      - type: bind
+        source: ./api
+        target: /var/www/api.helioviewer.org
+      - api_logs:/var/www/api.helioviewer.org/log
+  web:
+    build:
+      dockerfile: ./compose/dockerfiles/webserver.Dockerfile
+    ports:
+      - 8080:80
+    depends_on:
+      - api
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./helioviewer.org
+        target: /var/www/html
+      - type: bind
+        source: ./api
+        target: /var/www/api.helioviewer.org
+      - cache:/var/www/html/cache
+  movies:
+    depends_on:
+      - redis
+    build:
+      dockerfile: ./compose/dockerfiles/movie_builder.Dockerfile
+    platform: linux/x86_64
+    volumes:
+      - type: bind
+        source: ./api
+        target: /var/www/api.helioviewer.org
+      - jp2_volume:/tmp/jp2
+      - cache:/var/www/helioviewer.org/cache
+  cli:
+    build:
+      dockerfile: ./compose/dockerfiles/cli.Dockerfile
+    depends_on:
+      database:
+        condition: service_healthy
+    platform: linux/x86_64
+    volumes:
+      - type: volume
+        source: jp2_volume
+        target: /tmp/jp2
+      - type: bind
+        source: ./api
+        target: /root/api
+
+volumes:
+  jp2_volume:
+  cache:
+  api_logs:
