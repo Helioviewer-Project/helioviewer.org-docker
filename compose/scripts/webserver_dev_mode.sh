@@ -5,9 +5,6 @@ set -e
 sed -i "s|https://api.helioviewer.org|http://localhost:8081|" /var/www/html/resources/js/Utility/Config.js
 sed -i "s|https://helioviewer.org|http://localhost:8080|" /var/www/html/resources/js/Utility/Config.js
 
-apt update
-apt install -y ant python3
-
 cd /root
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
 export NVM_DIR="$HOME/.nvm"
@@ -18,6 +15,15 @@ nvm install 18.16.0
 cd /var/www/html/resources/build
 npm ci
 ant
+
+# Setup background process to rebuild js/css on change
+rebuild_on_change() {
+    while [ true ]; do
+        inotifywait .. -e attrib -r
+        ant
+    done
+}
+rebuild_on_change &
 
 source /etc/apache2/envvars
 /usr/sbin/apache2 -DFOREGROUND
