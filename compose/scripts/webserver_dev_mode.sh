@@ -2,8 +2,14 @@
 # (Changes urls from helioviewer.org to localhost)
 set -e
 
-sed -i "s|https://api.helioviewer.org|http://localhost:8081|" /var/www/html/resources/js/Utility/Config.js
-sed -i "s|https://helioviewer.org|http://localhost:8080|" /var/www/html/resources/js/Utility/Config.js
+# sed -i doesn't work for some reason inside the container...
+# so instead, manually write the updated config to a tmp file
+# then write the final edited config back to the config file.
+configfile=/var/www/html/resources/js/Utility/Config.js
+tmpconfig=/tmp/tmpconfig
+sed "s|https://api.helioviewer.org|http://localhost:8081|" $configfile > $tmpconfig
+sed "s|https://helioviewer.org|http://localhost:8080|" $tmpconfig > $configfile
+rm $tmpconfig
 
 cd /root
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
