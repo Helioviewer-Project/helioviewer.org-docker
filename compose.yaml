@@ -78,7 +78,7 @@ services:
         target: /tmp/jp2
       - type: bind
         source: ./api
-        target: /root/api
+        target: /home/admin/api
 
 volumes:
   jp2_volume:
