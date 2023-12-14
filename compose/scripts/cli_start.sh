@@ -8,7 +8,7 @@ TMPFILE=/tmp/settings.cfg
 sed "s|dbhost = localhost|dbhost = database|" ${SETTINGS_DIR}/settings.example.cfg > $TMPFILE
 sed -i "s|/mnt/data/hvpull|/tmp|" $TMPFILE
 sed -i "s|/mnt/data/jp2|/tmp/jp2|" $TMPFILE
-sed "s|server = localhost|server=|" $TMPFILE > ${SETTINGS_DIR}/settings.example.cfg
+sed "s|server = localhost|server=|" $TMPFILE > ${SETTINGS_DIR}/settings.cfg
 
 # Download some test data
 set -e
