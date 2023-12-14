@@ -1,8 +1,8 @@
-FROM php:8.0.27-apache
+FROM php:8.0.30-apache
 
 # Install API dependencies
 RUN apt update                                                                                                              \
-    && apt install -y unzip libpng-dev libjpeg-dev python3 python3-venv                                                                \
+    && apt install -y unzip libpng-dev libjpeg-dev python3 python3-venv                                                     \
     && curl -s --output imagemagick.zip -X GET https://codeload.github.com/ImageMagick/ImageMagick6/zip/refs/tags/6.9.12-70 \
     && unzip imagemagick.zip                                                                                                \
     && rm imagemagick.zip                                                                                                   \
