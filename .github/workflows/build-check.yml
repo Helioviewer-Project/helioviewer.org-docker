@@ -1,8 +1,6 @@
 name: Build check
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -14,8 +12,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-      - uses: isbang/compose-action@v1.5.1
-        with:
-          compose-file: "./compose.yaml"
-          up-flags: "--build"
-          down-flags: "--volumes"
+
+      - name: Build containers
+        run: docker compose build
+
+      - name: Check that containers start and become healthy
+        run: docker compose up -d --wait
