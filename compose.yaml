@@ -28,6 +28,12 @@ services:
       - redis
     restart: on-failure
     platform: linux/amd64
+    healthcheck:
+      # Check every 10 seconds, wait up to 2 minutes
+      test: ["CMD", "ls", "/tmp/container_ready"]
+      interval: 10s
+      timeout: 1s
+      retries: 12
     volumes:
       - type: volume
         source: jp2_volume
@@ -76,6 +82,12 @@ services:
       database:
         condition: service_healthy
     platform: linux/x86_64
+    healthcheck:
+      # Check every 10 seconds, wait up to 2 minutes
+      test: ["CMD", "ls", "/tmp/jp2/LASCO-C2/2023/12/01/white-light/"]
+      interval: 10s
+      timeout: 1s
+      retries: 12
     volumes:
       - type: volume
         source: jp2_volume

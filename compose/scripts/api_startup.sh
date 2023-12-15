@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
+READY_FILE=/tmp/container_ready
+rm -f $READY_FILE
 
 mkdir -p /var/www/helioviewer.org/cache/tiles
 chmod 777 /var/www/helioviewer.org/cache/tiles
@@ -17,5 +19,5 @@ bash /root/api_config.sh
 chmod 777 /var/www/api.helioviewer.org/log
 
 source /etc/apache2/envvars
-touch /tmp/container_ready
+touch $READY_FILE
 /usr/sbin/apache2 -DFOREGROUND
