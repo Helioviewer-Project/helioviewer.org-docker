@@ -31,8 +31,5 @@ jobs:
           touch api/settings/Config.php
           chmod o+rw api/settings/Config.php
 
-      - name: Debug cli container
-        run: docker compose up cli
-
       - name: Check that containers start and become healthy
         run: docker compose up -d --wait
