@@ -8,7 +8,7 @@ ENV APACHE_DOCUMENT_ROOT /var/www/api.helioviewer.org/docroot
 COPY ./compose/scripts/install_composer.sh /root
 COPY api/install/kakadu/Kakadu_v6_4_1-00781N_Linux-64-bit-Compiled.tar.gz kdu.tar.gz
 RUN apt update                                                                                                              \
-    && apt install -y unzip libpng-dev libjpeg-dev libfreetype-dev python3 python3-venv                                     \
+    && apt install -y unzip libpng-dev libjpeg-dev libfreetype-dev python3-dev libmariadb-dev python3-venv                                     \
     && curl -s --output imagemagick.zip -X GET https://codeload.github.com/ImageMagick/ImageMagick6/zip/refs/tags/6.9.12-70 \
     && unzip imagemagick.zip                                                                                                \
     && rm imagemagick.zip                                                                                                   \
