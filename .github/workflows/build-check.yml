@@ -16,5 +16,8 @@ jobs:
       - name: Build containers
         run: docker compose build
 
+      - name: Debug cli container
+        run: docker compose up cli
+
       - name: Check that containers start and become healthy
         run: docker compose up -d --wait
