@@ -17,4 +17,5 @@ bash /root/api_config.sh
 chmod 777 /var/www/api.helioviewer.org/log
 
 source /etc/apache2/envvars
+touch /tmp/container_ready
 /usr/sbin/apache2 -DFOREGROUND
