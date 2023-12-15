@@ -17,13 +17,13 @@ jobs:
         run: docker compose build
 
       - name: Make writeable configuration files
-      run: |
-        touch api/install/settings/settings.cfg
-        chmod o+rw api/install/settings/settings.cfg
-        touch api/settings/Config.ini
-        chmod o+rw api/settings/Config.ini
-        touch api/settings/Config.php
-        chmod o+rw api/settings/Config.php
+        run: |
+          touch api/install/settings/settings.cfg
+          chmod o+rw api/install/settings/settings.cfg
+          touch api/settings/Config.ini
+          chmod o+rw api/settings/Config.ini
+          touch api/settings/Config.php
+          chmod o+rw api/settings/Config.php
 
       - name: Debug cli container
         run: docker compose up cli
