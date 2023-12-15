@@ -16,6 +16,12 @@ jobs:
       - name: Build containers
         run: docker compose build
 
+      - name: Get latest api version
+        run: cd api && git pull origin main
+
+      - name: Get latest helioviewer.org version
+        run: cd helioviewer.org && git pull origin main
+
       - name: Make writeable configuration files
         run: |
           touch api/install/settings/settings.cfg
