@@ -2,7 +2,7 @@ name: Build check
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "push-to-hub-test" ]
 
 jobs:
   build-containers:
@@ -10,6 +10,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
 
       - name: Build containers
         run: docker compose build
