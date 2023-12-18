@@ -18,6 +18,7 @@ services:
       - 6379:6379
     restart: on-failure
   api:
+    image: dgarciabriseno/helioviewer-api-dev
     build:
       dockerfile: ./compose/dockerfiles/api_server.Dockerfile
     ports:
@@ -27,6 +28,12 @@ services:
       - redis
     restart: on-failure
     platform: linux/amd64
+    healthcheck:
+      # Check every 10 seconds, wait up to 2 minutes
+      test: ["CMD", "ls", "/tmp/container_ready"]
+      interval: 10s
+      timeout: 1s
+      retries: 12
     volumes:
       - type: volume
         source: jp2_volume
@@ -38,6 +45,7 @@ services:
         target: /var/www/api.helioviewer.org
       - api_logs:/var/www/api.helioviewer.org/log
   web:
+    image: dgarciabriseno/helioviewer-web-dev
     build:
       dockerfile: ./compose/dockerfiles/webserver.Dockerfile
     ports:
@@ -54,6 +62,7 @@ services:
         target: /var/www/api.helioviewer.org
       - cache:/var/www/html/cache
   movies:
+    image: dgarciabriseno/helioviewer-movies-dev
     depends_on:
       - redis
     build:
@@ -66,12 +75,19 @@ services:
       - jp2_volume:/tmp/jp2
       - cache:/var/www/helioviewer.org/cache
   cli:
+    image: dgarciabriseno/helioviewer-cli-dev
     build:
       dockerfile: ./compose/dockerfiles/cli.Dockerfile
     depends_on:
       database:
         condition: service_healthy
     platform: linux/x86_64
+    healthcheck:
+      # Check every 10 seconds, wait up to 2 minutes
+      test: ["CMD", "ls", "/tmp/jp2/LASCO-C2/2023/12/01/white-light/"]
+      interval: 10s
+      timeout: 1s
+      retries: 12
     volumes:
       - type: volume
         source: jp2_volume
