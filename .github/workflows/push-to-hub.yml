@@ -2,7 +2,7 @@ name: Build check
 
 on:
   push:
-    branches: [ "main", "push-to-hub-test" ]
+    branches: [ "main" ]
 
 jobs:
   build-containers:
