@@ -9,7 +9,7 @@ Once installed clone this repo and run docker compose:
 ```bash
 git clone --recurse-submodules https://github.com/Helioviewer-Project/helioviewer.org-docker.git
 cd helioviewer.org-docker
-docker compose up
+docker compose up -d --wait
 ```
 
 It may take a while for the containers to be built and the application to start up.
