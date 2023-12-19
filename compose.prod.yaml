@@ -80,16 +80,19 @@ services:
     secrets:
       - api_config
       - api_private
-  # movies:
-  #   image: dgarciabriseno/helioviewer-movies
-  #   depends_on:
-  #     - redis
-  #   build:
-  #     dockerfile: ./compose.prod/dockerfiles/movie_builder.Dockerfile
-  #   platform: linux/x86_64
-  #   volumes:
-  #     - jp2_volume:/tmp/jp2
-  #     - cache:/var/www/helioviewer.org/cache
+  movies:
+    image: dgarciabriseno/helioviewer-movies
+    depends_on:
+      redis:
+        condition: service_started
+      database:
+        condition: service_healthy
+    build:
+      dockerfile: ./compose.prod/dockerfiles/movie_builder.Dockerfile
+    platform: linux/x86_64
+    volumes:
+      - jp2_volume:/tmp/jp2
+      - cache:/var/www/helioviewer.org/cache
   # cli:
   #   image: dgarciabriseno/helioviewer-cli
   #   build:
