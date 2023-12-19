@@ -93,22 +93,48 @@ services:
     volumes:
       - jp2_volume:/tmp/jp2
       - cache:/var/www/helioviewer.org/cache
-  # cli:
-  #   image: dgarciabriseno/helioviewer-cli
-  #   build:
-  #     dockerfile: ./compose.prod/dockerfiles/cli.Dockerfile
-  #   depends_on:
-  #     database:
-  #       condition: service_healthy
-  #   platform: linux/x86_64
-  #   healthcheck:
-  #     # Check every 10 seconds, wait up to 2 minutes
-  #     test: ["CMD", "ls", "/tmp/jp2/LASCO-C2/2023/12/01/white-light/"]
-  #     interval: 10s
-  #     timeout: 1s
-  #     retries: 12
-  #   volumes:
-  #     - jp2_volume:/tmp/jp2
+  soho:
+    image: dgarciabriseno/helioviewer-downloader
+    command: "-d hv_soho"
+    restart: always
+    platform: linux/x86_64
+    build:
+      dockerfile: ./compose.prod/dockerfiles/downloader.Dockerfile
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - jp2_volume:/tmp/jp2
+    secrets:
+      - api_settings
+  sdo:
+    image: dgarciabriseno/helioviewer-downloader
+    command: "-d lmsal"
+    restart: always
+    platform: linux/x86_64
+    build:
+      dockerfile: ./compose.prod/dockerfiles/downloader.Dockerfile
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - jp2_volume:/tmp/jp2
+    secrets:
+      - api_settings
+  stereo:
+    image: dgarciabriseno/helioviewer-downloader
+    command: "-d hv_stereo"
+    restart: always
+    platform: linux/x86_64
+    build:
+      dockerfile: ./compose.prod/dockerfiles/downloader.Dockerfile
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - jp2_volume:/tmp/jp2
+    secrets:
+      - api_settings
 
 volumes:
   jp2_volume:
