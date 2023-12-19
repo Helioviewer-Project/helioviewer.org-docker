@@ -7,7 +7,7 @@ services:
       MARIADB_ROOT_PASSWORD_FILE: /run/secrets/mariadb_password
     ports:
       - 3306:3306
-    restart: on-failure
+    restart: always
     healthcheck:
       test: ["CMD", "bash", "/usr/local/bin/healthcheck.sh", "--connect"]
       interval: 5s
@@ -20,7 +20,7 @@ services:
     image: redis
     ports:
       - 6379:6379
-    restart: on-failure
+    restart: always
   # Database initializer (creates tables + helioviewer user account)
   database_setup:
     image: dgarciabriseno/helioviewer-db-init
@@ -28,7 +28,7 @@ services:
       database:
         condition: service_healthy
     build:
-      dockerfile: ./compose.prod/dockerfiles/db_init.Dockerfile
+      dockerfile: ./compose.prod/dockerfiles/db_init.prod.Dockerfile
       context: .
     secrets:
       - api_settings
@@ -38,7 +38,7 @@ services:
   api:
     image: dgarciabriseno/helioviewer-api
     build:
-      dockerfile: ./compose.prod/dockerfiles/api.Dockerfile
+      dockerfile: ./compose.prod/dockerfiles/api.prod.Dockerfile
       context: .
     ports:
       - 8081:80
@@ -49,7 +49,7 @@ services:
         condition: service_started
       database_setup:
         condition: service_completed_successfully
-    restart: on-failure
+    restart: always
     platform: linux/amd64
     healthcheck:
       # Check every 10 seconds, wait up to 2 minutes
@@ -61,20 +61,25 @@ services:
       - cache:/var/www/helioviewer.org/cache
       - cache:/var/www/api.helioviewer.org/docroot/cache
       - api_logs:/var/www/api.helioviewer.org/log
+      - jp2_volume:/tmp/jp2
     secrets:
       - api_config
       - api_private
-  # web:
-  #   image: dgarciabriseno/helioviewer-web
-  #   build:
-  #     dockerfile: ./compose.prod/dockerfiles/webserver.Dockerfile
-  #   ports:
-  #     - 8080:80
-  #   depends_on:
-  #     - api
-  #   restart: on-failure
-  #   volumes:
-  #     - cache:/var/www/html/cache
+  web:
+    image: dgarciabriseno/helioviewer-web
+    build:
+      dockerfile: ./compose.prod/dockerfiles/webserver.prod.Dockerfile
+    ports:
+      - 8080:80
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: always
+    volumes:
+      - cache:/var/www/html/cache
+    secrets:
+      - api_config
+      - api_private
   # movies:
   #   image: dgarciabriseno/helioviewer-movies
   #   depends_on:
