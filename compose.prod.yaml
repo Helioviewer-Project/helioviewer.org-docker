@@ -1,5 +1,6 @@
 name: helioviewer
 services:
+  # Relational database for helioviewer
   database:
     image: mariadb
     environment:
@@ -14,11 +15,26 @@ services:
       retries: 3
     secrets:
       - mariadb_password
+  # In memory cache for helioviewer
   redis:
     image: redis
     ports:
       - 6379:6379
     restart: on-failure
+  # Database initializer (creates tables + helioviewer user account)
+  database_setup:
+    image: dgarciabriseno/helioviewer-db-init
+    depends_on:
+      database:
+        condition: service_healthy
+    build:
+      dockerfile: ./compose.prod/dockerfiles/db_init.Dockerfile
+      context: .
+    secrets:
+      - api_settings
+      - db_setup_script
+    volumes:
+      - jp2_volume:/tmp/jp2
   api:
     image: dgarciabriseno/helioviewer-api
     build:
@@ -27,8 +43,12 @@ services:
     ports:
       - 8081:80
     depends_on:
-      - database
-      - redis
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      database_setup:
+        condition: service_completed_successfully
     restart: on-failure
     platform: linux/amd64
     healthcheck:
@@ -94,3 +114,7 @@ secrets:
     file: secrets/Config.ini
   api_private:
     file: secrets/Private.php
+  api_settings:
+    file: secrets/settings.cfg
+  db_setup_script:
+    file: secrets/headless_setup.sh

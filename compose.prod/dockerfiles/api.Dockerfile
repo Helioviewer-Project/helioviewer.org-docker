@@ -1,4 +1,5 @@
 FROM php:8.0.30-apache
+ENV PYTHON_VERSION=3.11.7
 
 # Install API dependencies
 # Setup kakadu for kdu_* commands
@@ -34,8 +35,8 @@ WORKDIR /tmp
 RUN curl -L -X GET https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh --output miniforge.sh \
     && bash miniforge.sh -b -p /tmp/miniforge3                                                                                        \
     && rm miniforge.sh
-RUN export PATH=$PATH:/tmp/miniforge3/bin           \
-    && mamba create -n helioviewer -y python=3.11.7 \
+RUN export PATH=$PATH:/tmp/miniforge3/bin                    \
+    && mamba create -n helioviewer -y python=$PYTHON_VERSION \
     && mamba init
 RUN apt install -y libmariadb-dev
 
