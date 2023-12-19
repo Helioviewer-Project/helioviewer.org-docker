@@ -93,6 +93,10 @@ services:
     volumes:
       - jp2_volume:/tmp/jp2
       - cache:/var/www/helioviewer.org/cache
+      - movie_logs:/var/www/api.helioviewer.org/log
+    secrets:
+      - api_config
+      - api_private
   soho:
     image: dgarciabriseno/helioviewer-downloader
     command: "-d hv_soho"
@@ -140,6 +144,7 @@ volumes:
   jp2_volume:
   cache:
   api_logs:
+  movie_logs:
 
 secrets:
   mariadb_password:
