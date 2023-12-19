@@ -1,0 +1,96 @@
+name: helioviewer
+services:
+  database:
+    image: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/mariadb_password
+    ports:
+      - 3306:3306
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "bash", "/usr/local/bin/healthcheck.sh", "--connect"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    secrets:
+      - mariadb_password
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    restart: on-failure
+  api:
+    image: dgarciabriseno/helioviewer-api
+    build:
+      dockerfile: ./compose.prod/dockerfiles/api.Dockerfile
+      context: .
+    ports:
+      - 8081:80
+    depends_on:
+      - database
+      - redis
+    restart: on-failure
+    platform: linux/amd64
+    healthcheck:
+      # Check every 10 seconds, wait up to 2 minutes
+      test: ["CMD", "ls", "/tmp/container_ready"]
+      interval: 10s
+      timeout: 1s
+      retries: 12
+    volumes:
+      - cache:/var/www/helioviewer.org/cache
+      - cache:/var/www/api.helioviewer.org/docroot/cache
+      - api_logs:/var/www/api.helioviewer.org/log
+    secrets:
+      - api_config
+      - api_private
+  # web:
+  #   image: dgarciabriseno/helioviewer-web
+  #   build:
+  #     dockerfile: ./compose.prod/dockerfiles/webserver.Dockerfile
+  #   ports:
+  #     - 8080:80
+  #   depends_on:
+  #     - api
+  #   restart: on-failure
+  #   volumes:
+  #     - cache:/var/www/html/cache
+  # movies:
+  #   image: dgarciabriseno/helioviewer-movies
+  #   depends_on:
+  #     - redis
+  #   build:
+  #     dockerfile: ./compose.prod/dockerfiles/movie_builder.Dockerfile
+  #   platform: linux/x86_64
+  #   volumes:
+  #     - jp2_volume:/tmp/jp2
+  #     - cache:/var/www/helioviewer.org/cache
+  # cli:
+  #   image: dgarciabriseno/helioviewer-cli
+  #   build:
+  #     dockerfile: ./compose.prod/dockerfiles/cli.Dockerfile
+  #   depends_on:
+  #     database:
+  #       condition: service_healthy
+  #   platform: linux/x86_64
+  #   healthcheck:
+  #     # Check every 10 seconds, wait up to 2 minutes
+  #     test: ["CMD", "ls", "/tmp/jp2/LASCO-C2/2023/12/01/white-light/"]
+  #     interval: 10s
+  #     timeout: 1s
+  #     retries: 12
+  #   volumes:
+  #     - jp2_volume:/tmp/jp2
+
+volumes:
+  jp2_volume:
+  cache:
+  api_logs:
+
+secrets:
+  mariadb_password:
+    file: secrets/mariadb_password
+  api_config:
+    file: secrets/Config.ini
+  api_private:
+    file: secrets/Private.php
