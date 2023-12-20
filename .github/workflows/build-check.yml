@@ -33,6 +33,7 @@ jobs:
 
       - name: Check that containers start and become healthy
         run: docker compose up -d --wait
+
   build-prod:
     runs-on: ubuntu-latest
 
@@ -44,23 +45,19 @@ jobs:
       - name: Copy production test configuration files
         run: |
           mkdir secrets && cd secrets
-          echo ${{ secrets.API_CONFIG }} > Config.ini
-          echo ${{ secrets.API_PRIVATE }} > Private.php
-          echo ${{ secrets.API_SETTINGS }} > settings.cfg
-          echo ${{ secrets.CONFIG_JS }} > Config.js
-          echo ${{ secrets.DB_PASSWORD }} > mariadb_password
-          echo ${{ secrets.HEADLESS_SETUP }} > headless_setup.sh
+          echo "${{ secrets.API_CONFIG }}" | base64 -d > Config.ini
+          echo "${{ secrets.API_PRIVATE }}" | base64 -d > Private.php
+          echo "${{ secrets.API_SETTINGS }}" | base64 -d > settings.cfg
+          echo "${{ secrets.CONFIG_JS }}" | base64 -d > Config.js
+          echo "${{ secrets.DB_PASSWORD }}" | base64 -d > mariadb_password
+          echo "${{ secrets.HEADLESS_SETUP }}" | base64 -d > headless_setup.sh
 
       - name: Build production containers
         run: |
           export TAG=$(git rev-parse --short "$GITHUB_SHA")
           docker compose -f compose.prod.yaml build
 
-      - name: Attach to database
-        run: |
-          export TAG=$(git rev-parse --short "$GITHUB_SHA")
-          docker compose -f compose.prod.yaml up database
-
       - name: Check that production containers start and become healthy
         run: |
+          export TAG=$(git rev-parse --short "$GITHUB_SHA")
           docker compose -f compose.prod.yaml up -d --wait
