@@ -56,7 +56,11 @@ jobs:
           export TAG=$(git rev-parse --short "$GITHUB_SHA")
           docker compose -f compose.prod.yaml build
 
-      - name: Check that production containers start and become healthy
+      - name: Attach to database
         run: |
           export TAG=$(git rev-parse --short "$GITHUB_SHA")
+          docker compose -f compose.prod.yaml up database
+
+      - name: Check that production containers start and become healthy
+        run: |
           docker compose -f compose.prod.yaml up -d --wait
