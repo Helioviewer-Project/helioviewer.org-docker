@@ -52,7 +52,12 @@ jobs:
           echo "${{ secrets.DB_PASSWORD }}" | base64 -d > mariadb_password
           echo "${{ secrets.HEADLESS_SETUP }}" | base64 -d > headless_setup.sh
 
-      - name: Check that database starts
+      - name: Build production containers
         run: |
           export TAG=$(git rev-parse --short "$GITHUB_SHA")
-          docker compose -f compose.prod.yaml up database
+          docker compose -f compose.prod.yaml build
+
+      - name: Check that production containers start and become healthy
+        run: |
+          export TAG=$(git rev-parse --short "$GITHUB_SHA")
+          docker compose -f compose.prod.yaml up -d --wait
