@@ -2,7 +2,7 @@ name: helioviewer
 services:
   # Relational database for helioviewer
   database:
-    image: mariadb:latest
+    image: mariadb:11
     environment:
       MARIADB_ROOT_PASSWORD_FILE: /run/secrets/mariadb_password
     ports:
