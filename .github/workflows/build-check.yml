@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-containers:
+  build-dev:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,3 +33,28 @@ jobs:
 
       - name: Check that containers start and become healthy
         run: docker compose up -d --wait
+  build-prod:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+            submodules: 'recursive'
+
+      - name: Copy production test configuration files
+        run: |
+          mkdir secrets && cd secrets
+          echo ${{ secrets.API_CONFIG }} > Config.ini
+          echo ${{ secrets.API_PRIVATE }} > Private.php
+          echo ${{ secrets.API_SETTINGS }} > settings.cfg
+          echo ${{ secrets.CONFIG_JS }} > Config.js
+          echo ${{ secrets.DB_PASSWORD }} > mariadb_password
+          echo ${{ secrets.HEADLESS_SETUP }} > headless_setup.sh
+
+      - name: Build production containers
+        run: |
+          export TAG=$(git rev-parse --short "$GITHUB_SHA")
+          docker compose -f compose.prod.yaml build
+
+      - name: Check that production containers start and become healthy
+        run: docker compose -f compose.prod.yaml up -d --wait
