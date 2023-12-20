@@ -1,4 +1,4 @@
-name: Dev build and start
+name: Container Build
 
 on:
   pull_request:
