@@ -17,6 +17,10 @@ RUN bash /root/install_composer.sh
 RUN apt install -y unzip
 WORKDIR /var/www/api.helioviewer.org
 RUN composer install
+ENV PHP_CONF_DIR=/usr/local/etc/php
+RUN rm $PHP_CONF_DIR/php.ini-development
+RUN mv $PHP_CONF_DIR/php.ini-production $PHP_CONF_DIR/php.ini
+
 COPY compose.prod/scripts/web.prod.startup.sh /root
 ENTRYPOINT ["bash", "/root/web.prod.startup.sh"]
 # ENTRYPOINT ["tail", "-F", "/dev/null"]

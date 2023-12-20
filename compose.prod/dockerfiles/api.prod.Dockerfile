@@ -40,6 +40,10 @@ RUN export PATH=$PATH:/tmp/miniforge3/bin                    \
     && mamba init
 RUN apt install -y libmariadb-dev
 
+ENV PHP_CONF_DIR=/usr/local/etc/php
+RUN rm $PHP_CONF_DIR/php.ini-development
+RUN mv $PHP_CONF_DIR/php.ini-production $PHP_CONF_DIR/php.ini
+
 # Copy the startup script over.
 COPY ./compose.prod/scripts/api.prod.startup.sh /root
 WORKDIR /var/www/api.helioviewer.org
