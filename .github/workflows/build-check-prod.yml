@@ -10,6 +10,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+            submodules: 'recursive'
 
       - name: Copy production test configuration files
         run: |
