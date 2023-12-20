@@ -1,4 +1,4 @@
-name: Build check
+name: Dev build and start
 
 on:
   pull_request:
