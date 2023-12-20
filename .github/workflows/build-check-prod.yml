@@ -22,7 +22,9 @@ jobs:
           echo ${{ secrets.HEADLESS_SETUP }} > headless_setup.sh
 
       - name: Build production containers
-        run: docker compose -f compose.prod.yaml build
+        run: |
+          export TAG=$(git rev-parse --short "$GITHUB_SHA")
+          docker compose -f compose.prod.yaml build
 
       - name: Check that production containers start and become healthy
         run: docker compose -f compose.prod.yaml up -d --wait
