@@ -5,8 +5,6 @@ services:
     image: mariadb:11
     environment:
       MARIADB_ROOT_PASSWORD_FILE: /run/secrets/mariadb_password
-    ports:
-      - 3306:3306
     restart: always
     healthcheck:
       test: ["CMD", "bash", "/usr/local/bin/healthcheck.sh", "--connect"]
@@ -18,12 +16,11 @@ services:
   # In memory cache for helioviewer
   redis:
     image: redis:latest
-    ports:
-      - 6379:6379
     restart: always
   # Database initializer (creates tables + helioviewer user account)
   database_setup:
     image: dgarciabriseno/helioviewer-db-init:${TAG}
+    platform: linux/amd64
     depends_on:
       database:
         condition: service_healthy

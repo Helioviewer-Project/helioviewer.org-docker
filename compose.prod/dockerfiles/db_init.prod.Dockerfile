@@ -22,4 +22,4 @@ COPY ./compose.prod/scripts/init_db.sh /home/helioviewer
 
 VOLUME ["/tmp/jp2"]
 
-ENTRYPOINT ["conda", "run", "-n", "helioviewer", "/bin/bash", "/home/helioviewer/init_db.sh"]
+ENTRYPOINT ["conda", "run", "--live-stream", "-n", "helioviewer", "/bin/bash", "/home/helioviewer/init_db.sh"]

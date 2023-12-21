@@ -15,15 +15,9 @@ RUN docker-php-ext-configure mysqli                                             
  && cd /var/www/api.helioviewer.org && composer install                                                                 \
  && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 SHELL ["bash", "--login", "-c"]
-# This isn't technically a secret, but it should be treated like the other config files.
-# Must be copied after cloning helioviewer.org, but before running `ant`
-COPY ./secrets/Config.js /var/www/html/resources/js/Utility/Config.js
 RUN nvm install 20.10.0                            \
- && cd /var/www/html/resources/build               \
- && ant                                            \
- && apt remove -y ant python3 && apt -y autoremove \
  && rm $PHP_CONF_DIR/php.ini-development           \
  && mv $PHP_CONF_DIR/php.ini-production $PHP_CONF_DIR/php.ini
 
-ENTRYPOINT ["bash", "/root/web.prod.startup.sh"]
+ENTRYPOINT ["bash", "--login", "/root/web.prod.startup.sh"]
 # ENTRYPOINT ["tail", "-F", "/dev/null"]

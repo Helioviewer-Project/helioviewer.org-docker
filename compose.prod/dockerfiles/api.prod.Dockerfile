@@ -11,6 +11,7 @@ ENV APACHE_DOCUMENT_ROOT /var/www/api.helioviewer.org/docroot
 COPY ./compose/scripts/install_composer.sh /root
 COPY api/install/kakadu/Kakadu_v6_4_1-00781N_Linux-64-bit-Compiled.tar.gz kdu.tar.gz
 COPY ./compose.prod/scripts/api.prod.startup.sh /root
+COPY ./compose.prod/api.apache.conf /etc/apache2/sites-available/000-default.conf
 RUN apt update                                                                                                                        \
  && apt install -y imagemagick git unzip libmariadb-dev                                                                               \
  && git clone --recursive https://github.com/Helioviewer-Project/api /var/www/api.helioviewer.org                                     \
@@ -40,8 +41,8 @@ RUN apt update                                                                  
  && mamba create -n helioviewer -y python=$PYTHON_VERSION                                                                             \
  && mamba init                                                                                                                        \
  && rm $PHP_CONF_DIR/php.ini-development                                                                                              \
- && mv $PHP_CONF_DIR/php.ini-production $PHP_CONF_DIR/php.ini
+ && mv $PHP_CONF_DIR/php.ini-production $PHP_CONF_DIR/php.ini                                                                         \
+ && a2enmod rewrite
 
 WORKDIR /var/www/api.helioviewer.org
 ENTRYPOINT ["bash", "--login", "/root/api.prod.startup.sh"]
-# ENTRYPOINT ["tail", "-F", "/dev/null"]
