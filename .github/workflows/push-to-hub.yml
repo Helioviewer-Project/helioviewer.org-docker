@@ -1,11 +1,31 @@
-name: Build check
+name: Build and Push to Hub
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
 
 jobs:
-  build-containers:
+  build-prod-containers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Build containers
+        run: docker compose -f compose.prod.yaml build
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push to hub
+        run: docker compose -f compose.prod.yaml push
+
+  build-dev-containers:
     runs-on: ubuntu-latest
 
     steps:
