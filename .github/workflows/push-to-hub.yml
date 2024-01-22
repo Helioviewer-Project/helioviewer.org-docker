@@ -14,7 +14,9 @@ jobs:
           submodules: 'recursive'
 
       - name: Build containers
-        run: docker compose -f compose.prod.yaml build
+        run: |
+          export TAG=$(git rev-parse --short "$GITHUB_SHA")
+          docker compose -f compose.prod.yaml build
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -23,7 +25,11 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Push to hub
-        run: docker compose -f compose.prod.yaml push
+        run: |
+          export TAG=$(git rev-parse --short "$GITHUB_SHA")
+          docker compose -f compose.prod.yaml push
+          export TAG=latest
+          docker compose -f compose.prod.yaml push
 
   build-dev-containers:
     runs-on: ubuntu-latest
