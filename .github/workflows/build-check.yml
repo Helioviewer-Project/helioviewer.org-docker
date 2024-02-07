@@ -36,6 +36,7 @@ jobs:
 
   build-prod:
     runs-on: ubuntu-latest
+    environment: prod-test
 
     steps:
       - uses: actions/checkout@v4
@@ -45,12 +46,12 @@ jobs:
       - name: Copy production test configuration files
         run: |
           mkdir secrets && cd secrets
-          echo "${{ secrets.API_CONFIG }}" | base64 -d > Config.ini
-          echo "${{ secrets.API_PRIVATE }}" | base64 -d > Private.php
-          echo "${{ secrets.API_SETTINGS }}" | base64 -d > settings.cfg
-          echo "${{ secrets.CONFIG_JS }}" | base64 -d > Config.js
-          echo "${{ secrets.DB_PASSWORD }}" | base64 -d > mariadb_password
-          echo "${{ secrets.HEADLESS_SETUP }}" | base64 -d > headless_setup.sh
+          echo "${{ vars.TEST_CONFIG_INI     }}" | base64 -d > Config.ini
+          echo "${{ vars.TEST_PRIVATE_PHP    }}" | base64 -d > Private.php
+          echo "${{ vars.TEST_SETTINGS_CFG   }}" | base64 -d > settings.cfg
+          echo "${{ vars.TEST_CONFIG_JS      }}" | base64 -d > Config.js
+          echo "${{ vars.TEST_PASSWORD       }}" | base64 -d > mariadb_password
+          echo "${{ vars.TEST_HEADLESS_SETUP }}" | base64 -d > headless_setup.sh
 
       - name: Build production containers
         run: |
