@@ -7,6 +7,8 @@ COPY compose.prod/scripts/web.prod.startup.sh /root
 
 RUN docker-php-ext-configure mysqli                                                                                     \
  && docker-php-ext-install -j$(nproc) mysqli                                                                            \
+ && pecl install redis                                                                                                  \
+ && docker-php-ext-enable redis                                                                                         \
  && apt update && apt install -y git ant python3 unzip                                                                  \
  && bash /root/install_composer.sh                                                                                      \
  && rm -rf /var/www/html/*                                                                                              \
