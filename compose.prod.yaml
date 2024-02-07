@@ -77,6 +77,7 @@ services:
     secrets:
       - api_config
       - api_private
+      - config_js
   movies:
     image: dgarciabriseno/helioviewer-movies:${TAG}
     depends_on:
@@ -154,3 +155,5 @@ secrets:
     file: secrets/settings.cfg
   db_setup_script:
     file: secrets/headless_setup.sh
+  config_js:
+    file: secrets/Config.js
