@@ -4,7 +4,7 @@ services:
   database:
     image: mariadb:11
     environment:
-      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/mariadb_password
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/mariadb-password
     restart: always
     healthcheck:
       test: ["CMD", "bash", "/usr/local/bin/healthcheck.sh", "--connect"]
@@ -12,7 +12,7 @@ services:
       timeout: 5s
       retries: 3
     secrets:
-      - mariadb_password
+      - mariadb-password
   # In memory cache for helioviewer
   redis:
     image: redis:latest
@@ -28,8 +28,8 @@ services:
       dockerfile: ./compose.prod/dockerfiles/db_init.prod.Dockerfile
       context: .
     secrets:
-      - api_settings
-      - db_setup_script
+      - api-settings
+      - db-setup-script
     volumes:
       - jp2_volume:/tmp/jp2
   api:
@@ -57,11 +57,11 @@ services:
     volumes:
       - cache:/var/www/helioviewer.org/cache
       - cache:/var/www/api.helioviewer.org/docroot/cache
-      - api_logs:/var/www/api.helioviewer.org/log
+      - api-logs:/var/www/api.helioviewer.org/log
       - jp2_volume:/tmp/jp2
     secrets:
-      - api_config
-      - api_private
+      - api-config
+      - api-private
   web:
     image: dgarciabriseno/helioviewer-web:${TAG}
     build:
@@ -75,8 +75,9 @@ services:
     volumes:
       - cache:/var/www/html/cache
     secrets:
-      - api_config
-      - api_private
+      - api-config
+      - api-private
+      - config-js
   movies:
     image: dgarciabriseno/helioviewer-movies:${TAG}
     depends_on:
@@ -92,8 +93,8 @@ services:
       - cache:/var/www/helioviewer.org/cache
       - movie_logs:/var/www/api.helioviewer.org/log
     secrets:
-      - api_config
-      - api_private
+      - api-config
+      - api-private
   soho:
     image: dgarciabriseno/helioviewer-downloader:${TAG}
     command: "-d hv_soho"
@@ -107,7 +108,7 @@ services:
     volumes:
       - jp2_volume:/tmp/jp2
     secrets:
-      - api_settings
+      - api-settings
   sdo:
     image: dgarciabriseno/helioviewer-downloader:${TAG}
     command: "-d lmsal"
@@ -121,7 +122,7 @@ services:
     volumes:
       - jp2_volume:/tmp/jp2
     secrets:
-      - api_settings
+      - api-settings
   stereo:
     image: dgarciabriseno/helioviewer-downloader:${TAG}
     command: "-d hv_stereo"
@@ -135,22 +136,24 @@ services:
     volumes:
       - jp2_volume:/tmp/jp2
     secrets:
-      - api_settings
+      - api-settings
 
 volumes:
   jp2_volume:
   cache:
-  api_logs:
+  api-logs:
   movie_logs:
 
 secrets:
-  mariadb_password:
-    file: secrets/mariadb_password
-  api_config:
+  mariadb-password:
+    file: secrets/mariadb-password
+  api-config:
     file: secrets/Config.ini
-  api_private:
+  api-private:
     file: secrets/Private.php
-  api_settings:
+  api-settings:
     file: secrets/settings.cfg
-  db_setup_script:
+  db-setup-script:
     file: secrets/headless_setup.sh
+  config-js:
+    file: secrets/Config.js
