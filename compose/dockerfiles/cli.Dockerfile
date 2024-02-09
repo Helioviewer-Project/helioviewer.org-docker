@@ -16,6 +16,7 @@ RUN adduser -D admin                                                     \
     && apk update                                                        \
     && apk add --virtual build-deps gcc python3-dev musl-dev mariadb-dev \
     && apk add --no-cache python3 expect gcompat mariadb-connector-c     \
+                          mariadb-client                                 \
     && python3 -m venv venv        \
     && venv/bin/pip install --no-cache-dir numpy sunpy matplotlib scipy glymur mysqlclient \
     && apk del --no-cache build-deps
