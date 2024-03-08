@@ -60,3 +60,11 @@ There are 5 primary containers that make up this environment
 There is also a "CLI" container, which doesn't provide any direct service, but is useful for development purposes like downloading test data or accessing application data.
 
 If any of the primary containers aren't running properly, this could be the source of some issues.
+
+## XDebug Ports
+If anything is listening on port 9003 besides xdebug, it can interfere with the xdebug extension running in the container.
+
+The **Jupyter** extensions by microsoft use port 9003 when you are working with a python notebook in vscode.
+This will interfere with the xdebug extension in the container, and it will seem like the webserver has hung.
+
+If everything seems like it should be working, but requests are hanging for no apparent reason, check if you have a running process listening on port 9003.
