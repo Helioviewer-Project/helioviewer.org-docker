@@ -96,6 +96,14 @@ services:
     platform: linux/amd64
     volumes_from:
       - api
+  jpip:
+    image: dgarciabriseno/helioviewer-jpip
+    build:
+      dockerfile: ./compose/dockerfiles/esajpip.Dockerfile
+    ports:
+      - 8090:8090
+    volumes:
+      - jp2_volume:/home/esajpip/images
 
 volumes:
   jp2_volume:
