@@ -7,8 +7,9 @@ To run the dev environment, install [Docker](https://docs.docker.com/get-docker/
 Once installed clone this repo and run docker compose:
 
 ```bash
-git clone --recurse-submodules https://github.com/Helioviewer-Project/helioviewer.org-docker.git
+git clone --recurse-submodules https://github.com/dgarciabriseno/helioviewer.org-docker.git
 cd helioviewer.org-docker
+git checkout jpip
 docker compose up -d --wait
 ```
 
