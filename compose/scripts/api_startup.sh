@@ -17,6 +17,7 @@ popd
 bash /root/api_config.sh
 
 chmod 777 /var/www/api.helioviewer.org/log
+mkdir /tmp/jp2/movies
 
 source /etc/apache2/envvars
 touch $READY_FILE
