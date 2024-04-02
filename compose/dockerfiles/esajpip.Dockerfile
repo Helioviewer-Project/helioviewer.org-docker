@@ -21,6 +21,9 @@ mv /esajpip.tar.gz .
 tar xf esajpip.tar.gz
 rm esajpip.tar.gz
 EOF
+VOLUME ["/home/esajpip/images"]
+RUN ln -s /home/esajpip/images /tmp/jp2
+
 WORKDIR /home/esajpip/server/esajpip
 USER esajpip
 ENTRYPOINT ["/home/esajpip/server/esajpip/esajpip"]
