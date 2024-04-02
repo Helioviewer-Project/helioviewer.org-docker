@@ -74,6 +74,14 @@ services:
         target: /var/www/api.helioviewer.org
       - jp2_volume:/tmp/jp2
       - cache:/var/www/helioviewer.org/cache
+  jpip:
+    image: dgarciabriseno/helioviewer-jpip
+    build:
+      dockerfile: ./compose/dockerfiles/esajpip.Dockerfile
+    ports:
+      - 8090:8090
+    volumes:
+      - jp2_volume:/home/esajpip/images
   cli:
     image: dgarciabriseno/helioviewer-cli-dev
     build:

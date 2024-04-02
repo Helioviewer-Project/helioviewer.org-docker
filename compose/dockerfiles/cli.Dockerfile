@@ -3,7 +3,7 @@ WORKDIR /root
 COPY api/install/kakadu/Kakadu_v6_4_1-00781N_Linux-64-bit-Compiled.tar.gz /root/kdu.tar.gz
 RUN tar xzf kdu.tar.gz
 
-FROM alpine
+FROM --platform=linux/x86_64 alpine
 # set home to future user home directory
 ENV HOME=/home/admin
 
@@ -11,14 +11,19 @@ ENV HOME=/home/admin
 COPY --from=builder /root/bin/* /usr/local/bin
 COPY --from=builder /root/lib/* /usr/lib
 WORKDIR $HOME
-RUN adduser -D admin                                                     \
-    && mkdir -p /tmp/jp2 && chown -R admin:admin /tmp/jp2                \
-    && apk update                                                        \
-    && apk add --virtual build-deps gcc python3-dev musl-dev mariadb-dev \
-    && apk add --no-cache python3 expect gcompat mariadb-connector-c     \
-    && python3 -m venv venv        \
-    && venv/bin/pip install --no-cache-dir numpy sunpy matplotlib scipy glymur mysqlclient \
-    && apk del --no-cache build-deps
+RUN <<EOF
+adduser -D admin
+mkdir -p /tmp/jp2
+apk update
+apk add --virtual build-deps gcc python3-dev musl-dev mariadb-dev
+apk add --no-cache python3 expect gcompat mariadb-connector-c
+python3 -m venv venv
+# lxml 5.2.0 is broken on x86 emulation on mac
+venv/bin/pip install --no-cache-dir numpy sunpy matplotlib scipy glymur mysqlclient lxml==5.1.1
+apk del --no-cache build-deps
+chown -R admin:admin /tmp/jp2
+chown -R admin:admin $HOME
+EOF
 
 WORKDIR $HOME
 # Copy remaining startup scripts

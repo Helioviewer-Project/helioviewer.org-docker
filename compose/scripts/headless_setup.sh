@@ -1,6 +1,6 @@
 #!/usr/bin/expect -f
 
-set timeout 5
+set timeout 30
 spawn python3 api/install/install.py
 
 expect "Location" { send "/tmp/jp2\r" }
