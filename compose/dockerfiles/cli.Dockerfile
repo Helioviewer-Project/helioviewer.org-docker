@@ -20,7 +20,7 @@ apk add --no-cache python3 expect gcompat mariadb-connector-c
 python3 -m venv venv
 venv/bin/pip install --no-cache-dir numpy sunpy matplotlib scipy glymur mysqlclient
 apk del --no-cache build-deps
-chown -R admin:admin /home/admin/.cache
+chown -R admin:admin /home/admin
 EOF
 
 WORKDIR $HOME
