@@ -15,6 +15,15 @@ docker compose up -d --wait
 It may take a while for the containers to be built and the application to start up.
 Once the output from docker settles down, check that it's running by going to http://localhost:8080/
 
+# Testing
+For contributors to this environment, you can write tests to verify that the
+Helioviewer environment is working. The `tests` folder contains scripts that
+test a particular feature of Helioviewer.
+
+After creating a test, add it to the `Test Helioviewer environment` step in
+`.github/workflows/build-check.yaml
+
+
 ## Debugging
 The container has xdebug configured for debugging.
 If you have xdebug listening on port 9003 (the default xdebug port), then php code running in the container will trigger debug requests.
