@@ -27,7 +27,7 @@ status=$(echo $result | jq -r ".status")
 if [ $status -ne 2 ]; then
     # On failure, print the error message and status of the request
     echo "Helioviewer environment failed to create a movie. Response:"
-    echo $($result | jq)
+    echo $(echo $result | jq)
     exit 1
 fi
 
