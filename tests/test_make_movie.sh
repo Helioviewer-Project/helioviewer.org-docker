@@ -16,8 +16,7 @@ response=$(curl -s -X GET "http://localhost:8081/?action=queueMovie&imageScale=1
 movie_id=$(echo $response | jq -r ".id")
 
 # 2. Wait some time for the movie container to process the request
-# It should be fast since it has one job.
-sleep 5
+sleep 10
 
 # 3. Send API request to retrieve status of the movie
 result=$(curl -s -X GET "http://localhost:8081/?action=getMovieStatus&id=$movie_id&format=mp4")
