@@ -11,14 +11,17 @@ ENV HOME=/home/admin
 COPY --from=builder /root/bin/* /usr/local/bin
 COPY --from=builder /root/lib/* /usr/lib
 WORKDIR $HOME
-RUN adduser -D admin                                                     \
-    && mkdir -p /tmp/jp2 && chown -R admin:admin /tmp/jp2                \
-    && apk update                                                        \
-    && apk add --virtual build-deps gcc python3-dev musl-dev mariadb-dev \
-    && apk add --no-cache python3 expect gcompat mariadb-connector-c     \
-    && python3 -m venv venv        \
-    && venv/bin/pip install --no-cache-dir numpy sunpy matplotlib scipy glymur mysqlclient \
-    && apk del --no-cache build-deps
+RUN <<EOF
+adduser -D admin
+mkdir -p /tmp/jp2 && chown -R admin:admin /tmp/jp2
+apk update
+apk add --virtual build-deps gcc python3-dev musl-dev mariadb-dev
+apk add --no-cache python3 expect gcompat mariadb-connector-c
+python3 -m venv venv
+venv/bin/pip install --no-cache-dir numpy sunpy matplotlib scipy glymur mysqlclient
+apk del --no-cache build-deps
+chown -R admin:admin /home/admin
+EOF
 
 WORKDIR $HOME
 # Copy remaining startup scripts
