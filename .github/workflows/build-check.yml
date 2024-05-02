@@ -33,3 +33,7 @@ jobs:
 
       - name: Check that containers start and become healthy
         run: docker compose up -d --wait
+
+      - name: Test Helioviewer environment
+        run: |
+          bash tests/test_make_movie.sh
