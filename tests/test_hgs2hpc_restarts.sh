@@ -14,13 +14,19 @@ set -e
 # 1. Verify hgs2hpc service is running
 # preg returns exit code 1 if the process is not found, which will make this
 # test fail
-docker exec helioviewer-api-1 pgrep -f hgs2hpc
+echo "Checking for hgs2hpc process"
+pid=$(docker exec helioviewer-api-1 pgrep -f hgs2hpc)
+echo "Found hgs2hpc process with PID $pid"
 
 # 2. Stop the API container
+echo "Stopping the api container"
 docker container stop helioviewer-api-1
 
 # 3. Restart the API container and wait for it to be ready
+echo "Restarting the api container via docker compose"
 docker compose up -d --wait
 
 # 4. Verify that the hgs2hpc service is running
-docker exec helioviewer-api-1 pgrep -f hgs2hpc
+echo "Checking that the hgs2hpc process is running"
+pid=$(docker exec helioviewer-api-1 pgrep -f hgs2hpc)
+echo "Found hgs2hpc process on pid $pid"
