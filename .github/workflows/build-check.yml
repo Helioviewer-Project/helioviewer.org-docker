@@ -13,6 +13,9 @@ jobs:
         with:
           submodules: 'recursive'
 
+      - name: Build containers
+        run: docker compose build
+
       - name: Get latest api version
         run: cd api && git checkout origin/main
 
