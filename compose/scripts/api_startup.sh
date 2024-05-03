@@ -7,6 +7,8 @@ mkdir -p /var/www/helioviewer.org/cache/tiles
 chmod 777 /var/www/helioviewer.org/cache/tiles
 
 COMPOSER_HOME=/root composer install
+# Delete the stale socket file if it exists
+rm -f /tmp/hgs2hpc.sock
 /var/www/api.helioviewer.org/vendor/bin/start_hgs2hpc
 
 pushd /var/www/api.helioviewer.org/install
