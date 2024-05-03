@@ -64,7 +64,10 @@ services:
   movies:
     image: dgarciabriseno/helioviewer-movies-dev
     depends_on:
-      - redis
+      redis:
+        condition: service_started
+      api:
+        condition: service_healthy
     build:
       dockerfile: ./compose/dockerfiles/movie_builder.Dockerfile
     platform: linux/x86_64
