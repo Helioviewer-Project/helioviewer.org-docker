@@ -12,7 +12,7 @@ set -e
 #  4. Verify that the hgs2hpc service is running
 
 # 1. Verify hgs2hpc service is running
-# preg returns exit code 1 if the process is not found, which will make this
+# pgrep returns exit code 1 if the process is not found, which will make this
 # test fail
 echo "Checking for hgs2hpc process"
 pid=$(docker exec helioviewer-api-1 pgrep -f hgs2hpc)
