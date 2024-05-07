@@ -84,6 +84,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      api:
+        condition: service_healthy
     platform: linux/x86_64
     healthcheck:
       # Check every 10 seconds, wait up to 2 minutes
