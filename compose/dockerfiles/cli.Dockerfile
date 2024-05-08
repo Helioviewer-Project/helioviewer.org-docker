@@ -26,6 +26,7 @@ EOF
 WORKDIR $HOME
 # Copy remaining startup scripts
 COPY ./compose/2021_06_01__00_01_29_132__SDO_AIA_AIA_304.jp2 $HOME
+COPY ./compose/2021_06_01__00_01_21_347__SDO_AIA_AIA_171.jp2 $HOME
 COPY ./compose/scripts/cli_start.sh $HOME
 COPY ./compose/scripts/headless_setup.sh $HOME
 
