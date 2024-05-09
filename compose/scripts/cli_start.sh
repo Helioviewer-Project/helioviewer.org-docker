@@ -1,6 +1,6 @@
 #!/bin/sh
 source venv/bin/activate
-cp /home/admin/2021_06_01__00_01_29_132__SDO_AIA_AIA_304.jp2 /tmp/jp2
+cp /home/admin/*.jp2 /tmp/jp2
 ./headless_setup.sh
 
 SETTINGS_DIR=/home/admin/api/install/settings
