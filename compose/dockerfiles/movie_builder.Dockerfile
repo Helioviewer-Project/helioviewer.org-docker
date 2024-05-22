@@ -1,4 +1,4 @@
-FROM dgarciabriseno/helioviewer-api-1
+FROM dgarciabriseno/helioviewer-api-dev
 COPY api/install/kakadu/Kakadu_v6_4_1-00781N_Linux-64-bit-Compiled.tar.gz /kakadu/kdu.tar.gz
 WORKDIR /kakadu
 RUN <<END_OF_COMMANDS
