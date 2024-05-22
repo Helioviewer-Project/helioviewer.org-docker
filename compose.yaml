@@ -17,6 +17,9 @@ services:
     ports:
       - 6379:6379
     restart: on-failure
+  # Supporting python api for the helioviewer api
+  coordinator:
+    image: dgarciabriseno/hv-coordinator:0.1.0
   api:
     image: dgarciabriseno/helioviewer-api-dev
     build:
@@ -26,6 +29,7 @@ services:
     depends_on:
       - database
       - redis
+      - coordinator
     restart: on-failure
     platform: linux/amd64
     healthcheck:
