@@ -34,6 +34,14 @@ jobs:
       - name: Check that containers start and become healthy
         run: docker compose up -d --wait
 
+      - name: Print logs
+        if: always()
+        run: |
+          docker logs helioviewer-api-1
+          docker logs helioviewer-web-1
+          docker logs helioviewer-cli-1
+          docker logs helioviewer-movies-1
+
       - name: Test Helioviewer environment
         run: |
           bash tests/test_hgs2hpc_restarts.sh
