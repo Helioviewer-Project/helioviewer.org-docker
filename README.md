@@ -9,11 +9,18 @@ Once installed clone this repo and run docker compose:
 ```bash
 git clone --recurse-submodules https://github.com/Helioviewer-Project/helioviewer.org-docker.git
 cd helioviewer.org-docker
+mv .env.example .env
 docker compose up -d --wait
 ```
 
 It may take a while for the containers to be built and the application to start up.
 Once the output from docker settles down, check that it's running by going to http://localhost:8080/
+
+## Configuration
+
+By default, this environment assumes you want to run and make
+this environment available on `localhost`. To change this, set
+the environment variable `HV_HOST` i.e. `HV_HOST=localhost`.
 
 # Testing
 For contributors to this environment, you can write tests to verify that the
