@@ -18,9 +18,8 @@ Once the output from docker settles down, check that it's running by going to ht
 
 ## Configuration
 
-By default, this environment assumes you want to run and make
-this environment available on `localhost`. To change this, set
-the environment variable `HV_HOST` i.e. `HV_HOST=localhost`.
+Configuration is made via the `.env` file. By default this is set to
+bind and run everything on localhost. You can change this by editing `.env`
 
 # Testing
 For contributors to this environment, you can write tests to verify that the
