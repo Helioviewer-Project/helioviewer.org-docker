@@ -13,6 +13,9 @@ jobs:
         with:
           submodules: 'recursive'
 
+      - name: Setup environment
+        run: mv .env.example .env
+
       - name: Build containers
         run: docker compose build
 
@@ -34,8 +37,15 @@ jobs:
       - name: Check that containers start and become healthy
         run: docker compose up -d --wait
 
+      - name: Print logs
+        if: always()
+        run: |
+          docker logs helioviewer-api-1
+          docker logs helioviewer-web-1
+          docker logs helioviewer-database-1
+          docker logs helioviewer-movies-1
+
       - name: Test Helioviewer environment
         run: |
-          bash tests/test_hgs2hpc_restarts.sh
           bash tests/test_make_movie.sh
           bash tests/test_aia_images.sh

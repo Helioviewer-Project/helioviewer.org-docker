@@ -9,8 +9,8 @@ sed -i "s|/var/www/api.helioviewer.org/docroot/cache|/var/www/helioviewer.org/ca
 sed -i "s|/var/www/api.helioviewer.org/docroot/jp2|/tmp/jp2|" $tmpfile
 mv $tmpfile $configfile
 
-echo "acao_url[] = http://localhost:8080" >> ${SETTINGS_DIR}/Config.ini
-echo "acao_url[] = http://127.0.0.1:8080" >> ${SETTINGS_DIR}/Config.ini
+echo "acao_url[] = http://$HV_HOST:$CLIENT_PORT" >> ${SETTINGS_DIR}/Config.ini
+echo "acao_url[] = http://127.0.0.1:$CLIENT_PORT" >> ${SETTINGS_DIR}/Config.ini
 
 tmpfile=/tmp/config.ini
 configfile=${SETTINGS_DIR}/Private.php
