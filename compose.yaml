@@ -2,6 +2,7 @@ name: helioviewer
 services:
   database:
     image: dgarciabriseno/helioviewer-db-dev
+    platform: linux/amd64
     build:
       dockerfile: ./compose/dockerfiles/db.Dockerfile
     environment:
@@ -82,7 +83,7 @@ services:
         condition: service_healthy
     build:
       dockerfile: ./compose/dockerfiles/movie_builder.Dockerfile
-    platform: linux/x86_64
+    platform: linux/amd64
     volumes:
       - type: bind
         source: ./api
