@@ -1,7 +1,9 @@
 name: helioviewer
 services:
   database:
-    image: mariadb
+    image: dgarciabriseno/helioviewer-db-dev
+    build:
+      dockerfile: ./compose/dockerfiles/db.Dockerfile
     environment:
       MARIADB_ROOT_PASSWORD: helioviewer
     ports:
@@ -12,6 +14,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 3
+    volumes:
+      - jp2_volume:/tmp/jp2
   redis:
     image: redis
     ports:
@@ -81,27 +85,6 @@ services:
         target: /var/www/api.helioviewer.org
       - jp2_volume:/tmp/jp2
       - cache:/var/www/helioviewer.org/cache
-  cli:
-    image: dgarciabriseno/helioviewer-cli-dev
-    build:
-      dockerfile: ./compose/dockerfiles/cli.Dockerfile
-    depends_on:
-      database:
-        condition: service_healthy
-    platform: linux/x86_64
-    healthcheck:
-      # Check every 10 seconds, wait up to 2 minutes
-      test: ["CMD", "ls", "/tmp/jp2/LASCO-C2/2023/12/01/white-light/"]
-      interval: 10s
-      timeout: 1s
-      retries: 12
-    volumes:
-      - type: volume
-        source: jp2_volume
-        target: /tmp/jp2
-      - type: bind
-        source: ./api
-        target: /home/admin/api
 
 volumes:
   jp2_volume:

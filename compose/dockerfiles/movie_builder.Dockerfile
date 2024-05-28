@@ -1,6 +1,4 @@
 FROM dgarciabriseno/helioviewer-api-dev
-COPY api/install/kakadu/Kakadu_v6_4_1-00781N_Linux-64-bit-Compiled.tar.gz /kakadu/kdu.tar.gz
-WORKDIR /kakadu
 RUN <<END_OF_COMMANDS
 apt update
 apt install -y ruby tcsh
@@ -13,4 +11,6 @@ chmod +x /usr/local/bin/resque
 END_OF_COMMANDS
 
 WORKDIR /var/www/api.helioviewer.org/scripts
-CMD REDIS_BACKEND=redis:6379 tcsh movie_queue.tcsh && tail -F /dev/null
+ENTRYPOINT ["/bin/bash", "-c"]
+ENV REDIS_BACKEND=redis:6379
+CMD ["tcsh movie_queue.tcsh && tail -F /dev/null"]
