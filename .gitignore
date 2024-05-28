@@ -2,3 +2,4 @@
 .devcontainer
 test_setup_done
 secrets
+.env
