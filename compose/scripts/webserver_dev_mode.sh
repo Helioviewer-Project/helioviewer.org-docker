@@ -8,7 +8,7 @@ set -e
 configfile=/var/www/html/resources/js/Utility/Config.js
 tmpconfig=/tmp/tmpconfig
 sed "s|https://api.helioviewer.org|http://$HV_HOST:$API_PORT|" $configfile > $tmpconfig
-sed "s|https://helioviewer.org|http://$HV_HOST:$WEB_PORT|" $tmpconfig > $configfile
+sed "s|https://helioviewer.org|http://$HV_HOST:$CLIENT_PORT|" $tmpconfig > $configfile
 rm $tmpconfig
 
 cd /root
