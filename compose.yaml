@@ -84,12 +84,8 @@ services:
     build:
       dockerfile: ./compose/dockerfiles/movie_builder.Dockerfile
     platform: linux/amd64
-    volumes:
-      - type: bind
-        source: ./api
-        target: /var/www/api.helioviewer.org
-      - jp2_volume:/tmp/jp2
-      - cache:/var/www/helioviewer.org/cache
+    volumes_from:
+      - api
 
 volumes:
   jp2_volume:
