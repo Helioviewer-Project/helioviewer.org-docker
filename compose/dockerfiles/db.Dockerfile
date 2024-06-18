@@ -25,6 +25,6 @@ RUN <<EOF
     mariadb -phelioviewer -e "GRANT ALL ON helioviewer.* to 'helioviewer'@'%'"
     sed 's!server = localhost!server=!g' settings/settings.example.cfg > settings/settings.cfg
     sed -i 's!/mnt/data/!/tmp/!g' settings/settings.cfg
-    expect -c 'spawn python3 downloader.py -d hv_soho -s "2023-12-01 00:00:00" -e "2023-12-01 01:00:00"; expect "Sleeping for 30 minutes"'
+    expect -c 'set timeout 600; spawn python3 downloader.py -d hv_soho -s "2023-12-01 00:00:00" -e "2023-12-01 01:00:00"; expect "Sleeping for 30 minutes"'
     pkill mariadb
 EOF
