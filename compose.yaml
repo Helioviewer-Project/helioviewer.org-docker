@@ -66,6 +66,12 @@ services:
     depends_on:
       - api
     restart: on-failure
+    healthcheck:
+      # Check every 10 seconds, wait up to 2 minutes
+      test: ["CMD", "curl", "-s", "-X", "GET", "http://localhost"]
+      interval: 10s
+      timeout: 1s
+      retries: 12
     volumes:
       - type: bind
         source: ./helioviewer.org
