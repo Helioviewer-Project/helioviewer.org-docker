@@ -1,4 +1,4 @@
-FROM php:8.0.30-apache
+FROM php:8.2.22-apache
 
 # Install API dependencies
 # Setup kakadu for kdu_* commands
