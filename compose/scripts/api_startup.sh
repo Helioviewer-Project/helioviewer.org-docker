@@ -3,8 +3,8 @@ set -e
 READY_FILE=/tmp/container_ready
 rm -f $READY_FILE
 
-mkdir -p /var/www/helioviewer.org/cache/tiles
-chmod 777 /var/www/helioviewer.org/cache/tiles
+chown www-data:www-data /var/www/helioviewer.org/cache
+chown www-data:www-data /var/www/api.helioviewer.org/cache
 
 COMPOSER_HOME=/root composer install
 
