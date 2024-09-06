@@ -4,7 +4,7 @@ READY_FILE=/tmp/container_ready
 rm -f $READY_FILE
 
 chown www-data:www-data /var/www/helioviewer.org/cache
-chown www-data:www-data /var/www/api.helioviewer.org/cache
+chown www-data:www-data /var/www/api.helioviewer.org/docroot/cache
 
 COMPOSER_HOME=/root composer install
 
