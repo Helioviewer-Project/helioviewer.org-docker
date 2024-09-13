@@ -12,8 +12,9 @@ if [ ! -f $configfile ]; then
     sed -i "s|/var/www/api.helioviewer.org/docroot/jp2|/tmp/jp2|" $tmpfile
     mv $tmpfile $configfile
 
+    echo "acao_url[] = http://$HV_HOST" >> ${SETTINGS_DIR}/Config.ini
     echo "acao_url[] = http://$HV_HOST:$CLIENT_PORT" >> ${SETTINGS_DIR}/Config.ini
-    echo "acao_url[] = http://127.0.0.1:$CLIENT_PORT" >> ${SETTINGS_DIR}/Config.ini
+    echo "acao_url[] = http://127.0.0.1" >> ${SETTINGS_DIR}/Config.ini
 fi
 
 
