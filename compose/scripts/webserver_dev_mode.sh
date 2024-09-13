@@ -7,7 +7,7 @@ set -e
 # then write the final edited config back to the config file.
 configfile=/var/www/html/resources/js/Utility/Config.js
 tmpconfig=/tmp/tmpconfig
-sed "s|https://api.helioviewer.org|http://$HV_HOST:$API_PORT|" $configfile > $tmpconfig
+sed "s|https://api.helioviewer.org|http://$API_HOST:$API_PORT|" $configfile > $tmpconfig
 sed "s|https://helioviewer.org|http://$HV_HOST:$CLIENT_PORT|" $tmpconfig > $configfile
 rm $tmpconfig
 
