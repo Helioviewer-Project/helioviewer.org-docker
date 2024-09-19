@@ -25,15 +25,6 @@ jobs:
       - name: Get latest helioviewer.org version
         run: cd helioviewer.org && git checkout origin/main
 
-      - name: Make writeable configuration files
-        run: |
-          touch api/install/settings/settings.cfg
-          chmod o+rw api/install/settings/settings.cfg
-          touch api/settings/Config.ini
-          chmod o+rw api/settings/Config.ini
-          touch api/settings/Config.php
-          chmod o+rw api/settings/Config.php
-
       - name: Check that containers start and become healthy
         run: docker compose up -d --wait
 
