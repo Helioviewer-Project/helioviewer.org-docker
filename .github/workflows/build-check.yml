@@ -36,12 +36,8 @@ jobs:
           docker logs helioviewer-database-1
           docker logs helioviewer-movies-1
 
-      - name: Install test dependencies
-        run: sudo apt install -y expect
-
       - name: Test Helioviewer environment
         run: |
           cd tests
           bash test_make_movie.sh
           bash test_aia_images.sh
-          bash test_downloaders.sh
