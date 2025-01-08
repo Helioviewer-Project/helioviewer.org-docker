@@ -10,6 +10,8 @@ COPY api/install .
 COPY compose/2021_06_01__00_01_21_347__SDO_AIA_AIA_171.jp2 img/2021_06_01__00_01_21_347__SDO_AIA_AIA_171.jp2
 COPY compose/2021_06_01__00_01_29_132__SDO_AIA_AIA_304.jp2 img/2021_06_01__00_01_29_132__SDO_AIA_AIA_304.jp2
 COPY compose/scripts/headless_setup.sh .
+COPY compose/scripts/download_test_data.sh .
+COPY compose/scripts/downloader.expect .
 COPY api/install/kakadu/Kakadu_v6_4_1-00781N_Linux-64-bit-Compiled.tar.gz kdu.tar.gz
 RUN <<EOF
 tar xzf kdu.tar.gz
@@ -27,6 +29,6 @@ RUN <<EOF
     && mariadb -phelioviewer -e "GRANT ALL ON helioviewer.* to 'helioviewer'@'%'" \
     && sed 's!server = localhost!server=!g' settings/settings.example.cfg > settings/settings.cfg \
     && sed -i 's!/mnt/data/!/tmp/!g' settings/settings.cfg \
-    && expect -c 'set timeout 600; spawn python3 downloader.py -d hv_soho -s "2023-12-01 00:00:00" -e "2023-12-01 01:00:00"; expect "Sleeping for 30 minutes"' \
+    && bash download_test_data.sh \
     && pkill mariadb
 EOF
