@@ -11,21 +11,27 @@ declare -A end_date
 
 # IRIS jpeg2000s are not publicly retrievable and cannot be tested here.
 # kcor is not active and has a bug at the time of writing where XML can't be parsed.
-n_downloaders=9
-downloaders=(halpha lmsal rob xrt hv_soho hv_stereo suvi solar_orbiter)
+downloaders=(halpha lmsal rob xrt hv_soho hv_stereo suvi solar_orbiter rhessi)
 
 # optional date ranges.
 # default is 3 months ago
-default_start=$(date -d "3 months ago")
-default_end=$(date -d "$default_start + 5 minutes")
-start_date["lmsal"]="2024-12-31 00:00:00"
-end_date["lmsal"]="2024-12-31 00:05:00"
-start_date["hv_soho"]="2024-10-08 00:00:00"
+default_start="2024-12-31 00:00:00"
+default_end="2024-12-31 00:05:00"
+
+start_date["xrt"]="2024-11-07 00:00:00"
+end_date["xrt"]="2024-11-07 01:00:00"
+
+start_date["hv_soho"]="2024-10-08 01:00:00"
 end_date["hv_soho"]="2024-10-08 02:00:00"
-start_date["hv_stereo"]="2024-10-08 00:00:00"
+
+start_date["hv_stereo"]="2024-10-08 01:00:00"
 end_date["hv_stereo"]="2024-10-08 02:00:00"
+
 start_date["solar_orbiter"]="2024-07-02 12:00:00"
 end_date["solar_orbiter"]="2024-07-02 12:10:00"
+
+start_date["rhessi"]="2018-02-11 00:00:00"
+end_date["rhessi"]="2018-02-11 5:00:00"
 
 for downloader in ${downloaders[@]}; do
     echo "Testing $downloader downloader"
