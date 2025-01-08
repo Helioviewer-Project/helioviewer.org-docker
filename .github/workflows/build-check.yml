@@ -38,6 +38,7 @@ jobs:
 
       - name: Test Helioviewer environment
         run: |
-          bash tests/test_make_movie.sh
-          bash tests/test_aia_images.sh
-          bash tests/test_downloaders.sh
+          cd tests
+          bash test_make_movie.sh
+          bash test_aia_images.sh
+          bash test_downloaders.sh
