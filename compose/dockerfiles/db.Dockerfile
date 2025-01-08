@@ -3,7 +3,7 @@ WORKDIR /root
 RUN apt update
 RUN apt install -y python3 python3-pip python3-dev default-libmysqlclient-dev build-essential pkg-config expect
 ENV PIP_BREAK_SYSTEM_PACKAGES=1
-RUN python3 -m pip install numpy==2.0.0 sunpy==5.1.4 glymur==0.13.4 matplotlib==3.9.1 scipy==1.14.0 mysqlclient
+RUN python3 -m pip install numpy==2.2.1 sunpy==6.0.4 glymur==0.13.6 matplotlib==3.10.0 scipy==1.15.0 mysqlclient==2.2.6
 
 
 COPY api/install .

@@ -40,3 +40,4 @@ jobs:
         run: |
           bash tests/test_make_movie.sh
           bash tests/test_aia_images.sh
+          bash tests/test_downloaders.sh
