@@ -21,8 +21,8 @@ default_end="2024-12-31 00:05:00"
 start_date["xrt"]="2024-11-07 00:00:00"
 end_date["xrt"]="2024-11-07 01:00:00"
 
-start_date["hv_soho"]="2024-10-08 01:00:00"
-end_date["hv_soho"]="2024-10-08 02:00:00"
+start_date["hv_soho"]="2023-12-01 00:00:00"
+end_date["hv_soho"]="2023-12-01 01:00:00"
 
 start_date["hv_stereo"]="2024-10-08 01:00:00"
 end_date["hv_stereo"]="2024-10-08 02:00:00"
