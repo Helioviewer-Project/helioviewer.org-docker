@@ -24,7 +24,7 @@ services:
     restart: on-failure
   # Supporting python api for the helioviewer api
   coordinator:
-    image: dgarciabriseno/hv-coordinator:0.1.0
+    image: dgarciabriseno/hv-coordinator:0.2.1
   api:
     env_file:
       - .env
