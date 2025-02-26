@@ -25,7 +25,7 @@ services:
   # Supporting python api for the helioviewer api
   coordinator:
     restart: always
-    image: dgarciabriseno/hv-coordinator:0.3.1
+    image: dgarciabriseno/hv-coordinator:0.3.3
     ports:
       - 8000:80
   api:
