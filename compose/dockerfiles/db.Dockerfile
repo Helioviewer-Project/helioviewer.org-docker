@@ -25,7 +25,6 @@ RUN <<EOF
     MARIADB_ROOT_PASSWORD=helioviewer docker-entrypoint.sh mariadbd &
     sleep 10 \
     && ./headless_setup.sh \
-    && mariadb -phelioviewer -e "CREATE USER 'helioviewer'@'%' IDENTIFIED BY 'helioviewer'" \
     && mariadb -phelioviewer -e "GRANT ALL ON helioviewer.* to 'helioviewer'@'%'" \
     && sed 's!server = localhost!server=!g' settings/settings.example.cfg > settings/settings.cfg \
     && sed -i 's!/mnt/data/!/tmp/!g' settings/settings.cfg \
