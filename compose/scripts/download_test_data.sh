@@ -11,8 +11,7 @@ declare -A end_date
 
 # IRIS jpeg2000s are not publicly retrievable and cannot be tested here.
 # kcor is not active and has a bug at the time of writing where XML can't be parsed.
-# 2025-06-23 temporarily removed rhessi, need to pull from helioviewer instead of upstream source.
-downloaders=(kcor halpha jsoc rob xrt hv_soho hv_stereo suvi solar_orbiter)
+downloaders=(kcor halpha jsoc rob xrt hv_soho hv_stereo suvi solar_orbiter hv_rhessi)
 
 # optional date ranges.
 # default is 3 months ago
@@ -31,8 +30,8 @@ end_date["hv_stereo"]="2024-10-08 02:00:00"
 start_date["solar_orbiter"]="2024-07-02 12:00:00"
 end_date["solar_orbiter"]="2024-07-02 12:10:00"
 
-start_date["rhessi"]="2018-02-11 00:00:00"
-end_date["rhessi"]="2018-02-11 5:00:00"
+start_date["hv_rhessi"]="2018-02-11 00:00:00"
+end_date["hv_rhessi"]="2018-02-11 5:00:00"
 
 start_date["kcor"]="2024-04-09 17:48:00"
 end_date["kcor"]="2024-04-09 17:50:00"

@@ -32,5 +32,10 @@ if ! nvm list | grep -q "v18.16.0"; then
 else
     echo "Node.js v18.16.0 is already installed"
 fi
+
+cd /var/www/html/resources/build
+npm ci
+ant
+
 source /etc/apache2/envvars
 /usr/sbin/apache2 -DFOREGROUND
