@@ -7,9 +7,9 @@ set -e
 # then write the final edited config back to the config file.
 configfile=/var/www/html/resources/js/Utility/Config.js
 tmpconfig=/tmp/tmpconfig
-sed "s|https://api.helioviewer.org/coordinate|http://$COORDINATOR_HOST:$COORDINATOR_PORT|" $configfile > $tmpconfig
-sed -i "s|https://api.helioviewer.org|http://$API_HOST:$API_PORT|" $tmpconfig
-sed -i "s|https://helioviewer.org|http://$CLIENT_HOST:$CLIENT_PORT|" $tmpconfig
+sed "s|https://api.helioviewer.org/coordinate|$COORDINATOR_URL|" $configfile > $tmpconfig
+sed -i "s|https://api.helioviewer.org|$API_URL|" $tmpconfig
+sed -i "s|https://helioviewer.org|$CLIENT_URL|" $tmpconfig
 cp $tmpconfig $configfile
 rm $tmpconfig
 
