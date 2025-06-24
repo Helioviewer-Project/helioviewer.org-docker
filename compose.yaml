@@ -27,7 +27,7 @@ services:
     restart: always
     image: dgarciabriseno/hv-coordinator:0.3.3
     ports:
-      - 8000:80
+      - ${COORDINATOR_PORT}:80
   api:
     env_file:
       - .env
