@@ -41,3 +41,4 @@ jobs:
           cd tests
           bash test_make_movie.sh
           bash test_aia_images.sh
+          bash test_verify_cors.sh
