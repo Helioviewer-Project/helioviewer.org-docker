@@ -1,4 +1,26 @@
 name: helioviewer
+
+x-volumes: &local_volumes
+  jp2_volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/jp2
+  cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/cache
+  api_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/logs
+  db_data:
+
 services:
   database:
     image: dgarciabriseno/helioviewer-db-dev
@@ -7,8 +29,6 @@ services:
       dockerfile: ./compose/dockerfiles/db.Dockerfile
     environment:
       MARIADB_ROOT_PASSWORD: helioviewer
-    ports:
-      - 3306:3306
     restart: always
     healthcheck:
       test: ["CMD", "bash", "/usr/local/bin/healthcheck.sh", "--connect"]
@@ -17,17 +37,53 @@ services:
       retries: 3
     volumes:
       - jp2_volume:/tmp/jp2
+      - db_data:/var/lib/mysql
+  db-init:
+    image: dgarciabriseno/helioviewer-db-dev
+    platform: linux/amd64
+    env_file:
+      - .env
+    environment:
+      USE_TEST_DATA: ${USE_TEST_DATA}
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - api_logs:/tmp/log
+      - jp2_volume:/tmp/jp2
+      - db_data:/var/lib/mysql
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        if [ "$${USE_TEST_DATA}" = "true" ]; then
+          echo "USE_TEST_DATA is true, skipping database initialization..."
+          exit 0
+        fi
+        if [ -f /tmp/log/data_initialized_do_not_delete ]; then
+          echo "Database already initialized, skipping..."
+          exit 0
+        fi
+        echo "Initializing database..."
+        # Drop existing database and user
+        mariadb -h database -u root -phelioviewer <<EOF
+        DROP DATABASE IF EXISTS helioviewer;
+        DROP USER IF EXISTS 'helioviewer'@'%';
+        EOF
+        # Replace 127.0.0.1 with database hostname in headless_setup.sh
+        sed -i 's/127\.0\.0\.1/database/g' /root/headless_setup.sh
+        # Run headless setup
+        /root/headless_setup.sh
+        # Create marker file
+        touch /tmp/log/data_initialized_do_not_delete
+        echo "Database initialization complete."
   redis:
     image: redis
-    ports:
-      - 6379:6379
     restart: always
   # Supporting python api for the helioviewer api
   coordinator:
     restart: always
     image: dgarciabriseno/hv-coordinator:0.3.3
-    ports:
-      - ${COORDINATOR_PORT}:80
   api:
     env_file:
       - .env
@@ -35,7 +91,7 @@ services:
     build:
       dockerfile: ./compose/dockerfiles/api_server.Dockerfile
     ports:
-      - ${API_PORT}:80
+      - 127.0.0.1:${API_PORT}:80
     depends_on:
       - database
       - redis
@@ -58,54 +114,14 @@ services:
         source: ./api
         target: /var/www/api.helioviewer.org
       - api_logs:/var/www/api.helioviewer.org/log
-  web:
-    env_file:
-      - .env
-    image: dgarciabriseno/helioviewer-web-dev
-    build:
-      dockerfile: ./compose/dockerfiles/webserver.Dockerfile
-    ports:
-      - ${CLIENT_PORT}:80
-    depends_on:
-      - api
-    restart: always
-    healthcheck:
-      # Check every 10 seconds, wait up to 2 minutes
-      test: ["CMD", "curl", "-s", "-X", "GET", "http://localhost"]
-      interval: 10s
-      timeout: 1s
-      retries: 12
-    volumes:
-      - type: bind
-        source: ./helioviewer.org
-        target: /var/www/html
-      - type: bind
-        source: ./api
-        target: /var/www/api.helioviewer.org
-      - cache:/var/www/html/cache
-  movies:
-    restart: always
-    image: dgarciabriseno/helioviewer-movies-dev
-    depends_on:
-      redis:
-        condition: service_started
-      api:
-        condition: service_healthy
-    build:
-      dockerfile: ./compose/dockerfiles/movie_builder.Dockerfile
-    platform: linux/amd64
-    volumes_from:
-      - api
   jpip:
     image: dgarciabriseno/helioviewer-jpip
     build:
       dockerfile: ./compose/dockerfiles/esajpip.Dockerfile
     ports:
-      - 8090:8090
+      - 127.0.0.1:${ESAJPIP_PORT}:8090
     volumes:
       - jp2_volume:/home/esajpip/images
 
 volumes:
-  jp2_volume:
-  cache:
-  api_logs:
+  <<: *local_volumes
