@@ -114,12 +114,54 @@ services:
         source: ./api
         target: /var/www/api.helioviewer.org
       - api_logs:/var/www/api.helioviewer.org/log
+  web:
+    env_file:
+      - .env
+    image: dgarciabriseno/helioviewer-web-dev
+    build:
+      dockerfile: ./compose/dockerfiles/webserver.Dockerfile
+    ports:
+      - ${CLIENT_PORT}:80
+    depends_on:
+      - api
+    restart: always
+    healthcheck:
+      # Check every 10 seconds, wait up to 2 minutes
+      test: ["CMD", "curl", "-s", "-X", "GET", "http://localhost"]
+      interval: 10s
+      timeout: 1s
+      retries: 12
+    volumes:
+      - type: bind
+        source: ./helioviewer.org
+        target: /var/www/html
+      - type: bind
+        source: ./api
+        target: /var/www/api.helioviewer.org
+      - cache:/var/www/html/cache
+  movies:
+    restart: always
+    image: dgarciabriseno/helioviewer-movies-dev
+    depends_on:
+      redis:
+        condition: service_started
+      api:
+        condition: service_healthy
+    build:
+      dockerfile: ./compose/dockerfiles/movie_builder.Dockerfile
+    platform: linux/amd64
+    volumes_from:
+      - api
   jpip:
     image: dgarciabriseno/helioviewer-jpip
     build:
       dockerfile: ./compose/dockerfiles/esajpip.Dockerfile
     ports:
       - 127.0.0.1:${ESAJPIP_PORT}:8090
+    depends_on:
+      - api
+      - database
+      - db-init
     volumes:
       - jp2_volume:/home/esajpip/images
 
