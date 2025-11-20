@@ -16,10 +16,66 @@ docker compose up -d --wait
 It may take a while for the containers to be built and the application to start up.
 Once the output from docker settles down, check that it's running by going to http://localhost:8080/
 
+## ESAJPIP Usage
+
+This compose project supports running esajpip alone without the web front end.
+
+1. Clone this repository with recurse submodules:
+   ```bash
+   git clone --recurse-submodules https://github.com/helioviewer-project/helioviewer.org-docker.git
+   cd helioviewer.org-docker
+   ```
+
+2. Configure environment variables:
+   ```bash
+   mv .env.example .env
+   ```
+   Set variables accordingly. If you already have data, then set `USE_TEST_DATA=false`.
+
+3. Create the required folders:
+   ```bash
+   mkdir -p data/jp2 data/logs data/cache
+   ```
+   All your JPEGs should be placed in `data/jp2`. If your data is not in `data/jp2`, you can specify the path in the x-volumes section of `compose.yaml`. It should point to the top level directory containing jp2 files. The jp2 files may be in subdirectories.
+
+4. Run the JPIP server:
+   ```bash
+   docker compose up jpip
+   ```
+
 ## Configuration
 
 Configuration is made via the `.env` file. By default this is set to
 bind and run everything on localhost. You can change this by editing `.env`
+
+## Secure Connections
+
+If you plan to host this in production, you'll want to use SSL/TLS. To set this up:
+
+- For the Helioviewer API: Use nginx or Apache as a reverse proxy
+- For ESAJPIP: Note that a reverse proxy doesn't work for the JPIP protocol. Instead, use a socat tunnel:
+
+```bash
+/usr/bin/socat SSL-L:$PUBLIC_JPIP_PORT,reuseaddr,fork,cafile=path/to/your/ca.crt,cert=path/to/your/cert.crt,key=path/to/your/private.key,verify=0 TCP:127.0.0.1:$JPIP_CONTAINER_PORT
+```
+
+Replace `$PUBLIC_JPIP_PORT` with your desired public port and `$JPIP_CONTAINER_PORT` with the port exposed by the JPIP container. Update the certificate paths accordingly.
+
+You also need to update the API Configuration to point to your public JPIP URL by editing `api/settings/Config.ini` and updating the `[urls]` section:
+
+```ini
+[urls]
+; The URL that corresponds with the root_dir specified above. This is your API root
+web_root_url     = http://localhost
+
+; The URL that corresponds with the jp2_dir specified above.
+jp2_root_url     = http://localhost/jp2
+
+; The root URL to your JPIP server if one is available.
+jpip_root_url    = jpip://localhost:8090
+```
+
+Update these URLs to your domain. With JPIP served over SSL/TLS with socat, set the scheme to `jpips://` (e.g., `jpips://yourdomain.com:8090`).
 
 # Testing
 For contributors to this environment, you can write tests to verify that the
