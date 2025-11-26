@@ -12,6 +12,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
+      - name: Setup Environment
+        run: cp .env.example .env
 
       - name: Build containers
         run: docker compose build
