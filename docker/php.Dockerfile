@@ -1,4 +1,4 @@
-FROM php:8.2.25-apache
+FROM php:8.2.28-apache
 
 # Install API dependencies
 # Setup kakadu for kdu_* commands
@@ -33,9 +33,5 @@ EOF
 
 # Enable remote debugging with xdebug
 COPY ./compose/99-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-# Copy the startup script over.
-COPY ./compose/scripts/api_config.sh /root
-COPY ./compose/scripts/api_startup.sh /root
 COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 WORKDIR /var/www/api.helioviewer.org
-ENTRYPOINT ["bash", "/root/api_startup.sh"]

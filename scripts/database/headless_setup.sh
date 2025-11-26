@@ -2,9 +2,9 @@
 
 set timeout 5
 set root_password $::env(MARIADB_ROOT_PASSWORD)
-set db_name $::env(HELIOVIEWER_DB_NAME)
-set db_user $::env(HELIOVIEWER_DB_USER)
-set db_pass $::env(HELIOVIEWER_DB_PASS)
+set db_name $::env(HV_DB_NAME)
+set db_user $::env(HV_DB_USER)
+set db_pass $::env(HV_DB_PASS)
 spawn python3 install.py
 
 expect "Location" { send "/tmp/jp2\r" }
