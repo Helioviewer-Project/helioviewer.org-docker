@@ -9,13 +9,14 @@ usage() {
     echo "Usage: $0 <command>"
     echo ""
     echo "Available commands:"
-    echo "  init          Initialize settings for Docker environment"
-    echo "  composer      Run composer commands in the API container"
-    echo "  npm_install   Install npm dependencies for web client"
-    echo "  compile_js    Compile JavaScript for web client"
-    echo "  watch_js      Watch and rebuild JavaScript on changes"
-    echo "  watch_3d      Watch and rebuild 3D JavaScript on changes"
-    echo "  downloader    Run the Helioviewer data downloader"
+    echo "  init               Initialize settings for Docker environment"
+    echo "  composer           Run composer commands in the API container"
+    echo "  npm_install        Install npm dependencies for web client"
+    echo "  compile_js         Compile JavaScript for web client"
+    echo "  watch_js           Watch and rebuild JavaScript on changes"
+    echo "  watch_3d           Watch and rebuild 3D JavaScript on changes"
+    echo "  downloader         Run the Helioviewer data downloader"
+    echo "  download_test_data Download test data for development"
     echo ""
 }
 
@@ -242,6 +243,31 @@ downloader() {
         /app/downloader.py "$@"
 }
 
+# Download test data
+download_test_data() {
+    echo "Downloading test data..."
+
+    # Load environment variables from .env file
+    load_env
+
+    docker run --rm \
+        --init \
+        --stop-timeout 0 \
+        --network helioviewer_default \
+        --user "${UID}:$(id -g)" \
+        --env-file "${SCRIPT_DIR}/.env" \
+        --platform=linux/x86_64 \
+        --entrypoint /bin/bash \
+        -e HOME=/tmp \
+        -w /app/install \
+        -v "${SCRIPT_DIR}/scripts/download_test_data.sh:/app/download_test_data.sh" \
+        -v "${SCRIPT_DIR}/scripts/downloader.expect:/app/downloader.expect" \
+        -v "${SCRIPT_DIR}/api/install:/app/install" \
+        -v "${HOST_JPEG2000_PATH}:/tmp/jp2" \
+        ghcr.io/helioviewer-project/python \
+        /app/download_test_data.sh
+}
+
 # Main command dispatcher
 case "$1" in
     init)
@@ -266,6 +292,9 @@ case "$1" in
     downloader)
         shift
         downloader "$@"
+        ;;
+    download_test_data)
+        download_test_data
         ;;
     *)
         echo "Error: Unknown command '$1'"

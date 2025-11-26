@@ -1,0 +1,37 @@
+name: Helioviewer Docker
+
+on:
+  workflow_call:
+    inputs:
+      api-ref:
+        description: 'Git ref to checkout for api submodule'
+        required: false
+        default: 'main'
+        type: string
+      helioviewer-org-ref:
+        description: 'Git ref to checkout for helioviewer.org submodule'
+        required: false
+        default: 'main'
+        type: string
+
+jobs:
+  helioviewer-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Checkout api submodule ref
+        run: cd api && git checkout ${{ inputs.api-ref }}
+
+      - name: Checkout helioviewer.org submodule ref
+        run: cd helioviewer.org && git checkout ${{ inputs.helioviewer-org-ref }}
+
+      - name: Setup environment and start containers
+        run: |
+          cp .env.example .env && \
+          docker compose up --wait && \
+          ./manage.sh init

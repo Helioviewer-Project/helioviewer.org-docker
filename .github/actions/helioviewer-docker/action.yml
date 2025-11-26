@@ -1,0 +1,31 @@
+name: 'Helioviewer Docker Setup'
+description: 'Setup and start Helioviewer Docker containers'
+
+inputs:
+  api-ref:
+    description: 'Git ref to checkout for api submodule'
+    required: false
+    default: 'main'
+  helioviewer-org-ref:
+    description: 'Git ref to checkout for helioviewer.org submodule'
+    required: false
+    default: 'main'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout api submodule ref
+      shell: bash
+      run: cd api && git checkout ${{ inputs.api-ref }} && git submodule update --init --recursive
+
+    - name: Checkout helioviewer.org submodule ref
+      shell: bash
+      run: cd helioviewer.org && git checkout ${{ inputs.helioviewer-org-ref }} && git submodule update --init --recursive
+
+    - name: Setup environment and start containers
+      shell: bash
+      run: |
+        cp .env.example .env && \
+        docker compose up --wait && \
+        ./manage.sh init && \
+        ./manage.sh download_test_data

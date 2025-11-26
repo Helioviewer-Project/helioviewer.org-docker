@@ -1,0 +1,33 @@
+#!/usr/bin/env expect
+# Executes the image downloader.
+# Usage: downloader.expect downloader start_date end_date
+#   Example: downloader.expect lmsal "2024-12-31 00:00:00" "2024-12-31 00:05:00"
+#
+# This script will return 0 (success) if the downloader completes successfully.
+# This script will return 1 (failure) if the downloader doesn't find any new files.
+#    - If this happens, the test either needs to use a different time range or the process
+#      to find new files may need to be updated.
+# This script will return 2 (failure) if the downloader times out
+# This script will return 3 (failure) if the downloader fails to ingest an image
+#
+# The intended use of this script is to test that the downloaders are working properly
+# within the test environment. This can be used for example to verify that the
+# downloader process works with new versions of python and sunpy
+
+# Limit the download time to 10 minutes.
+set timeout 600
+# Start the downloader
+spawn python3 downloader.py -d [lindex $argv 0] -s "[lindex $argv 1]" -e "[lindex $argv 2]"
+
+# Analyze the output of the downloader process for certain messages.
+expect {
+  # This happens when the process is finished downloading. This is the success case.
+  Sleeping { exit 0 }
+  # Happens if no data was found for the time range. This is not suitable for testing, so fail.
+  "Found no new files" { exit 1 }
+  "Found 0 new files" { exit 1 }
+  # Happens if the process takes too long. Consider using a shorter time range, or debug why it's taking so long.
+  timeout  { exit 2 }
+  # Failed to parse an image file
+  BadImage { exit 3 }
+}

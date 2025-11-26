@@ -13,20 +13,14 @@ jobs:
         with:
           submodules: 'recursive'
 
-      - name: Setup environment
-        run: mv .env.example .env
-
       - name: Build containers
         run: docker compose build
 
-      - name: Get latest api version
-        run: cd api && git checkout origin/main
-
-      - name: Get latest helioviewer.org version
-        run: cd helioviewer.org && git checkout origin/main
-
-      - name: Check that containers start and become healthy
-        run: docker compose up -d --wait
+      - name: Setup and start Helioviewer Docker
+        uses: ./.github/actions/helioviewer-docker
+        with:
+          api-ref: 'origin/main'
+          helioviewer-org-ref: 'origin/main'
 
       - name: Print logs
         if: always()
