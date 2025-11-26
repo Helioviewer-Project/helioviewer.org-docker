@@ -17,6 +17,8 @@ jobs:
 
       - name: Build Helioviewer containers
         uses: ./.github/actions/helioviewer-build
+        with:
+          load: true
 
       - name: Setup and start Helioviewer Docker
         uses: ./.github/actions/helioviewer-docker

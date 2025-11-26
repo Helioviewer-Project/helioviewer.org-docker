@@ -6,6 +6,10 @@ inputs:
     description: Whether to push images to registry (requires write permissions)
     required: false
     default: 'false'
+  load:
+    description: Whether to load images into Docker (cannot be used with push or multi-platform builds)
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -27,9 +31,10 @@ runs:
         file: docker/node.Dockerfile
         platforms: linux/amd64,linux/arm64
         push: ${{ inputs.push }}
+        load: ${{ inputs.load }}
         tags: |
           ghcr.io/helioviewer-project/node:latest
-          ghcr.io/helioviewer-project/node:${{ github.ref_name }}
+          ghcr.io/helioviewer-project/node:${{ github.sha }}
 
     - name: Build and push python image
       uses: docker/build-push-action@v5
@@ -38,9 +43,10 @@ runs:
         file: docker/python.Dockerfile
         platforms: linux/amd64
         push: ${{ inputs.push }}
+        load: ${{ inputs.load }}
         tags: |
           ghcr.io/helioviewer-project/python:latest
-          ghcr.io/helioviewer-project/python:${{ github.ref_name }}
+          ghcr.io/helioviewer-project/python:${{ github.sha }}
 
     - name: Build and push php image
       uses: docker/build-push-action@v5
@@ -49,9 +55,10 @@ runs:
         file: docker/php.Dockerfile
         platforms: linux/amd64
         push: ${{ inputs.push }}
+        load: ${{ inputs.load }}
         tags: |
           ghcr.io/helioviewer-project/php:latest
-          ghcr.io/helioviewer-project/php:${{ github.ref_name }}
+          ghcr.io/helioviewer-project/php:${{ github.sha }}
 
     - name: Build and push movie-worker image
       uses: docker/build-push-action@v5
@@ -60,6 +67,7 @@ runs:
         file: docker/movies.Dockerfile
         platforms: linux/amd64
         push: ${{ inputs.push }}
+        load: ${{ inputs.load }}
         tags: |
           ghcr.io/helioviewer-project/movie-worker:latest
-          ghcr.io/helioviewer-project/movie-worker:${{ github.ref_name }}
+          ghcr.io/helioviewer-project/movie-worker:${{ github.sha }}
