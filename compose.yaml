@@ -148,17 +148,17 @@ services:
       - <<: *cache-mount
         target: /var/www/html/cache
   movies:
+    env_file:
+      - .env
     restart: always
-    image: dgarciabriseno/helioviewer-movies-dev
+    image: ghcr.io/helioviewer-project/movie-worker
     depends_on:
       database-init:
         condition: service_completed_successfully
       redis:
         condition: service_started
-      api:
-        condition: service_healthy
     build:
-      dockerfile: ./compose/dockerfiles/movie_builder.Dockerfile
+      dockerfile: docker/movies.Dockerfile
     platform: linux/amd64
     volumes_from:
       - api

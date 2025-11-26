@@ -109,13 +109,13 @@ init_config() {
 
         # Replace paths and URLs with Docker-appropriate values
         sed -i.bak 's|jp2_dir      = /var/www-api/docroot/jp2|jp2_dir      = /tmp/jp2|' "${config_file}"
-        sed -i.bak "s|web_root_url     = http://localhost|web_root_url     = http://${API_URL}|" "${config_file}"
-        sed -i.bak "s|client_url       = http://helioviewer.org|client_url       = http://${CLIENT_URL}|" "${config_file}"
+        sed -i.bak "s|web_root_url     = http://localhost|web_root_url     = ${API_URL}|" "${config_file}"
+        sed -i.bak "s|client_url       = http://helioviewer.org|client_url       = ${CLIENT_URL}|" "${config_file}"
         sed -i.bak "s|coordinator_url = 'http://coordinator'|coordinator_url = 'http://coordinator'|" "${config_file}"
         sed -i.bak 's|/var/www-api/docroot|/var/www/api.helioviewer.org/docroot|g' "${config_file}"
 
         # Add CORS allowed origins
-        sed -i.bak "s|;acao_url\[\] = ''|acao_url[] = 'http://localhost:8080'\nacao_url[] = 'http://127.0.0.1:8080'\nacao_url[] = 'http://${CLIENT_URL}'|" "${config_file}"
+        sed -i.bak "s|;acao_url\[\] = ''|acao_url[] = 'http://localhost:8080'\nacao_url[] = 'http://127.0.0.1:8080'\nacao_url[] = '${CLIENT_URL}'|" "${config_file}"
 
         # Clean up backup file
         rm -f "${config_file}.bak"
