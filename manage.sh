@@ -12,7 +12,7 @@ usage() {
     echo "  init               Initialize settings for Docker environment"
     echo "  composer           Run composer commands in the API container"
     echo "  npm_install        Install npm dependencies for web client"
-    echo "  compile_js         Compile JavaScript for web client"
+    echo "  build_js_css       Build JavaScript and CSS for web client"
     echo "  watch_js           Watch and rebuild JavaScript on changes"
     echo "  watch_3d           Watch and rebuild 3D JavaScript on changes"
     echo "  downloader         Run the Helioviewer data downloader"
@@ -201,13 +201,24 @@ composer() {
 # Install npm dependencies for web client
 npm_install() {
     echo "Installing npm dependencies..."
-    cd "${SCRIPT_DIR}/helioviewer.org" && NODE_OPTIONS='--localstorage-file=/tmp/helioviewer_localstorage' npm i
+    docker run --rm \
+        --user "${UID}:$(id -g)" \
+        -e NODE_OPTIONS='--localstorage-file=/tmp/helioviewer_localstorage' \
+        -v "${SCRIPT_DIR}/helioviewer.org:/app" \
+        -w /app \
+        node:lts \
+        npm install
 }
 
-# Compile JavaScript for web client
-compile_js() {
-    echo "Compiling JavaScript..."
-    cd "${SCRIPT_DIR}/helioviewer.org/resources/build" && ant
+# Build JavaScript and CSS for web client
+build_js_css() {
+    echo "Building JavaScript and CSS..."
+    docker run --rm \
+        --user "${UID}:$(id -g)" \
+        -v "${SCRIPT_DIR}/helioviewer.org:/app/helioviewer.org" \
+        -w /app/helioviewer.org/resources/build \
+        ghcr.io/helioviewer-project/node \
+        ant
 }
 
 # Watch and rebuild JavaScript on changes
@@ -280,8 +291,8 @@ case "$1" in
     npm_install)
         npm_install
         ;;
-    compile_js)
-        compile_js
+    build_js_css)
+        build_js_css
         ;;
     watch_js)
         watch_js

@@ -28,4 +28,6 @@ runs:
         cp .env.example .env && \
         docker compose up --wait && \
         ./manage.sh init && \
-        ./manage.sh download_test_data
+        ./manage.sh download_test_data && \
+        ./manage.sh npm_install && \
+        ./manage.sh compile_js
