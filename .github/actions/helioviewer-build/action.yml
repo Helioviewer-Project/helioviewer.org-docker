@@ -10,6 +10,10 @@ inputs:
     description: Whether to load images into Docker (cannot be used with push or multi-platform builds)
     required: false
     default: 'false'
+  arch:
+    description: Target architecture when loading (e.g., linux/amd64, linux/arm64)
+    required: false
+    default: 'linux/amd64'
 
 runs:
   using: composite
@@ -29,7 +33,7 @@ runs:
       with:
         context: .
         file: docker/node.Dockerfile
-        platforms: linux/amd64,linux/arm64
+        platforms: ${{ inputs.load == 'true' && inputs.arch || 'linux/amd64,linux/arm64' }}
         push: ${{ inputs.push }}
         load: ${{ inputs.load }}
         tags: |
