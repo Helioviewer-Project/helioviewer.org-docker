@@ -30,4 +30,4 @@ runs:
         ./manage.sh init && \
         ./manage.sh download_test_data && \
         ./manage.sh npm_install && \
-        ./manage.sh compile_js
+        ./manage.sh build_js_css
