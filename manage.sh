@@ -11,6 +11,10 @@ usage() {
     echo "Available commands:"
     echo "  init          Initialize settings for Docker environment"
     echo "  composer      Run composer commands in the API container"
+    echo "  npm_install   Install npm dependencies for web client"
+    echo "  compile_js    Compile JavaScript for web client"
+    echo "  watch_js      Watch and rebuild JavaScript on changes"
+    echo "  watch_3d      Watch and rebuild 3D JavaScript on changes"
     echo "  downloader    Run the Helioviewer data downloader"
     echo ""
 }
@@ -107,8 +111,11 @@ init_config() {
         sed -i.bak 's|jp2_dir      = /var/www-api/docroot/jp2|jp2_dir      = /tmp/jp2|' "${config_file}"
         sed -i.bak "s|web_root_url     = http://localhost|web_root_url     = http://${API_URL}|" "${config_file}"
         sed -i.bak "s|client_url       = http://helioviewer.org|client_url       = http://${CLIENT_URL}|" "${config_file}"
-        sed -i.bak "s|coordinator_url = 'http://coordinator'|coordinator_url = 'http://${COORDINATOR_URL}'|" "${config_file}"
+        sed -i.bak "s|coordinator_url = 'http://coordinator'|coordinator_url = 'http://coordinator'|" "${config_file}"
         sed -i.bak 's|/var/www-api/docroot|/var/www/api.helioviewer.org/docroot|g' "${config_file}"
+
+        # Add CORS allowed origins
+        sed -i.bak "s|;acao_url\[\] = ''|acao_url[] = 'http://localhost:8080'\nacao_url[] = 'http://127.0.0.1:8080'\nacao_url[] = 'http://${CLIENT_URL}'|" "${config_file}"
 
         # Clean up backup file
         rm -f "${config_file}.bak"
@@ -136,6 +143,32 @@ init_config() {
     fi
 }
 
+# Initialize web client Config.js for Docker environment
+init_web_config() {
+    echo "Initializing web client Config.js for Docker environment..."
+
+    local config_file="${SCRIPT_DIR}/helioviewer.org/resources/js/Utility/Config.js"
+
+    if [ ! -f "${config_file}" ]; then
+        echo "Error: ${config_file} not found"
+        exit 1
+    fi
+
+    # Load environment variables from .env file
+    load_env
+
+    # Replace API and client URLs with Docker-appropriate values
+    sed -i.bak "s|'back_end'                  : \"https://api.helioviewer.org/\"|'back_end'                  : \"${API_URL}/\"|" "${config_file}"
+    sed -i.bak "s|'web_root_url'              : \"https://helioviewer.org\"|'web_root_url'              : \"${CLIENT_URL}\"|" "${config_file}"
+    sed -i.bak "s|'user_video_feed'           : \"https://api.helioviewer.org/\"|'user_video_feed'           : \"${API_URL}/\"|" "${config_file}"
+    sed -i.bak "s|'coordinator_url'           : 'https://api.helioviewer.org/coordinate'|'coordinator_url'           : '${COORDINATOR_URL}/coordinate'|" "${config_file}"
+
+    # Clean up backup file
+    rm -f "${config_file}.bak"
+
+    echo "Web client Config.js initialized successfully at ${config_file}"
+}
+
 # Install PHP dependencies via Composer
 init_composer() {
     echo "Installing PHP dependencies..."
@@ -153,12 +186,39 @@ init() {
     init_config
     echo "-------------------------------------------"
 
+    init_web_config
+    echo "-------------------------------------------"
+
     init_composer
 }
 
 # Run composer in the API container
 composer() {
     docker compose exec api /usr/bin/composer "$@"
+}
+
+# Install npm dependencies for web client
+npm_install() {
+    echo "Installing npm dependencies..."
+    cd "${SCRIPT_DIR}/helioviewer.org" && NODE_OPTIONS='--localstorage-file=/tmp/helioviewer_localstorage' npm i
+}
+
+# Compile JavaScript for web client
+compile_js() {
+    echo "Compiling JavaScript..."
+    cd "${SCRIPT_DIR}/helioviewer.org/resources/build" && ant
+}
+
+# Watch and rebuild JavaScript on changes
+watch_js() {
+    echo "Watching JavaScript for changes..."
+    cd "${SCRIPT_DIR}/helioviewer.org/resources/build" && npx webpack watch
+}
+
+# Watch and rebuild 3D JavaScript on changes
+watch_3d() {
+    echo "Watching 3D JavaScript for changes..."
+    cd "${SCRIPT_DIR}/helioviewer.org/resources/build" && npx webpack --config webpack3d.config.js watch
 }
 
 # Run the downloader
@@ -190,6 +250,18 @@ case "$1" in
     composer)
         shift
         composer "$@"
+        ;;
+    npm_install)
+        npm_install
+        ;;
+    compile_js)
+        compile_js
+        ;;
+    watch_js)
+        watch_js
+        ;;
+    watch_3d)
+        watch_3d
         ;;
     downloader)
         shift
