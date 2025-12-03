@@ -26,6 +26,8 @@ runs:
       shell: bash
       run: |
         cp .env.example .env && \
+        echo "UID=$(id -u)" >> .env && \
+        echo "GID=$(id -g)" >> .env && \
         docker compose up --wait && \
         ./manage.sh init && \
         ./manage.sh download_test_data && \
