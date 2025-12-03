@@ -109,11 +109,12 @@ services:
     restart: always
     platform: linux/amd64
     healthcheck:
-      # Check every 10 seconds, wait up to 2 minutes
-      test: ["CMD", "ls", "/tmp/container_ready"]
+      # Check if Apache is responding on port 80
+      test: ["CMD", "curl", "-f", "http://localhost/"]
       interval: 10s
-      timeout: 1s
-      retries: 12
+      timeout: 5s
+      retries: 6
+      start_period: 5s
     volumes:
       - *jp2-mount
       - *api-mount
