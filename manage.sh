@@ -205,11 +205,13 @@ npm_install() {
     echo "Installing npm dependencies..."
     docker run --rm \
         --user "${UID}:$(id -g)" \
+        -e HOME=/tmp \
         -e NODE_OPTIONS='--localstorage-file=/tmp/helioviewer_localstorage' \
+        -e npm_config_cache=/tmp/.npm \
         -v "${SCRIPT_DIR}/helioviewer.org:/app" \
         -w /app \
         node:lts \
-        npm install
+        npm ci
 }
 
 # Build JavaScript and CSS for web client
@@ -217,6 +219,7 @@ build_js_css() {
     echo "Building JavaScript and CSS..."
     docker run --rm \
         --user "${UID}:$(id -g)" \
+        -e HOME=/tmp \
         -v "${SCRIPT_DIR}/helioviewer.org:/app/helioviewer.org" \
         -w /app/helioviewer.org/resources/build \
         ghcr.io/helioviewer-project/node \
