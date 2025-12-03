@@ -80,6 +80,8 @@ init_settings() {
         # Replace /mnt/data paths with /tmp paths for Docker volumes
         sed -i.bak 's|/mnt/data/hvpull|/tmp/hvpull|g' "${settings_file}"
         sed -i.bak 's|/mnt/data/jp2|/tmp/jp2|g' "${settings_file}"
+        # Disable email notifications by setting server to empty string
+        sed -i.bak 's/^server = localhost$/server = /' "${settings_file}"
         # Clean up backup file
         rm -f "${settings_file}.bak"
 
