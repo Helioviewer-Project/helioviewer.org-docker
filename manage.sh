@@ -274,6 +274,7 @@ download_test_data() {
     docker run --rm \
         --init \
         --stop-timeout 0 \
+        --network helioviewer_default \
         --user "${UID}:$(id -g)" \
         --env-file "${SCRIPT_DIR}/.env" \
         --platform=linux/x86_64 \
