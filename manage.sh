@@ -175,7 +175,12 @@ init_web_config() {
 # Install PHP dependencies via Composer
 init_composer() {
     echo "Installing PHP dependencies..."
-    docker compose exec api /usr/bin/composer install
+    docker run --rm \
+        --user "${UID}:$(id -g)" \
+        -v "${SCRIPT_DIR}/api:/app" \
+        -w /app \
+        composer:latest \
+        composer install
 }
 
 # Initialize all settings for Docker environment
