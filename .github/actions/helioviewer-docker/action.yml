@@ -32,5 +32,5 @@ runs:
         ./manage.sh init && \
         ./manage.sh npm_install && \
         ./manage.sh build_js_css && \
-        ./manage.sh download_test_data && \
-        docker compose up --wait
+        docker compose up --wait && \
+        ./manage.sh download_test_data
