@@ -29,8 +29,8 @@ runs:
         echo "UID=$(id -u)" >> .env && \
         echo "GID=$(id -g)" >> .env && \
         mkdir -p data/jp2 data/cache data/log && \
-        docker compose up --wait && \
         ./manage.sh init && \
-        ./manage.sh download_test_data && \
         ./manage.sh npm_install && \
-        ./manage.sh build_js_css
+        ./manage.sh build_js_css && \
+        ./manage.sh download_test_data && \
+        docker compose up --wait && \
