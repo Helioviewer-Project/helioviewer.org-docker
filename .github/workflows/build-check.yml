@@ -23,7 +23,7 @@ jobs:
       - name: Setup and start Helioviewer Docker
         uses: ./.github/actions/helioviewer-docker
         with:
-          docker-ref: ${{ github.head_ref || github.ref_name }}
+          docker-ref: ${{ github.ref }}
           api-ref: 'origin/main'
           helioviewer-org-ref: 'origin/main'
 
