@@ -36,6 +36,7 @@ jobs:
           docker logs helioviewer-movies-1
 
       - name: Test Helioviewer environment
+        working-directory: helioviewer.org-docker
         run: |
           cd tests
           bash test_make_movie.sh
