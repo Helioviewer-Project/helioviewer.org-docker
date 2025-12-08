@@ -59,6 +59,7 @@ services:
       - *install-mount
       - *db-data
   # Initialize database service with application data and credentials
+  # TODO: move this to manage.sh
   database-init:
     image: ghcr.io/helioviewer-project/python
     build:
@@ -110,7 +111,7 @@ services:
     platform: linux/amd64
     healthcheck:
       # Check if Apache is responding on port 80
-      test: ["CMD", "curl", "-f", "http://localhost/"]
+      test: ["CMD", "curl", "-f", "http://localhost/?action=getStatus"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -139,7 +140,7 @@ services:
     restart: always
     healthcheck:
       # Check every 10 seconds, wait up to 2 minutes
-      test: ["CMD", "curl", "-s", "-X", "GET", "http://localhost"]
+      test: ["CMD", "curl", "-f", "http://localhost/"]
       interval: 10s
       timeout: 1s
       retries: 12
