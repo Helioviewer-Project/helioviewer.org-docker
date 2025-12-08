@@ -36,6 +36,10 @@ runs:
       working-directory: helioviewer.org-docker
       run: cd helioviewer.org && git checkout ${{ inputs.helioviewer-org-ref }} && git submodule update --init --recursive
 
+    - name: Install expect
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y expect
+
     - name: Setup environment and start containers
       shell: bash
       working-directory: helioviewer.org-docker
