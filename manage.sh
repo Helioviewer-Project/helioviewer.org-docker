@@ -250,7 +250,9 @@ downloader() {
     # Load environment variables from .env file
     load_env
 
-    docker run --rm \
+    # Run in detached mode and trap SIGINT to send SIGKILL for immediate stop
+    local container_id
+    container_id=$(docker run -d \
         --init \
         --stop-timeout 0 \
         --network helioviewer_default \
@@ -261,7 +263,14 @@ downloader() {
         -v "${SCRIPT_DIR}/api/install:/app" \
         -v "${HOST_JPEG2000_PATH}:/tmp/jp2" \
         ghcr.io/helioviewer-project/python \
-        /app/downloader.py "$@"
+        /app/downloader.py "$@")
+
+    # Trap Ctrl+C to kill container immediately
+    trap "docker kill ${container_id} 2>/dev/null; exit 0" SIGINT SIGTERM
+
+    # Follow logs and wait for container to finish
+    docker logs -f "${container_id}"
+    docker wait "${container_id}" >/dev/null 2>&1
 }
 
 # Download test data
