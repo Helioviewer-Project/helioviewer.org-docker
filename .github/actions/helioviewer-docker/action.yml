@@ -24,7 +24,7 @@ runs:
         repository: helioviewer-project/helioviewer.org-docker
         ref: ${{ inputs.docker-ref }}
         path: helioviewer.org-docker
-        submodules: false
+        submodules: true
 
     - name: Checkout api submodule ref
       shell: bash
