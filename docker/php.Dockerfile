@@ -1,4 +1,4 @@
-FROM php:8.2.25-apache
+FROM php:8.2.28-apache
 
 # Install API dependencies
 # Setup kakadu for kdu_* commands
@@ -8,7 +8,7 @@ ENV APACHE_DOCUMENT_ROOT /var/www/api.helioviewer.org/docroot
 COPY api/install/kakadu/Kakadu_v6_4_1-00781N_Linux-64-bit-Compiled.tar.gz kdu.tar.gz
 RUN <<EOF
 apt update
-apt install -y unzip libpng-dev libjpeg-dev libfreetype-dev python3-dev libmariadb-dev python3-venv ffmpeg
+apt install -y unzip libpng-dev libjpeg-dev libfreetype-dev libmariadb-dev ffmpeg
 curl -s --output imagemagick.zip -X GET https://codeload.github.com/ImageMagick/ImageMagick6/zip/refs/tags/6.9.12-70
 unzip imagemagick.zip
 rm imagemagick.zip
@@ -29,13 +29,10 @@ mv lib/* /usr/lib
 rm -r bin lib
 sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+a2enmod rewrite
 EOF
 
 # Enable remote debugging with xdebug
 COPY ./compose/99-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-# Copy the startup script over.
-COPY ./compose/scripts/api_config.sh /root
-COPY ./compose/scripts/api_startup.sh /root
 COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 WORKDIR /var/www/api.helioviewer.org
-ENTRYPOINT ["bash", "/root/api_startup.sh"]

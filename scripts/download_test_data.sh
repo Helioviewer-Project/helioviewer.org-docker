@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 # This test verifies that downloaders are working as expected
 # Test Steps:
@@ -47,5 +46,5 @@ for downloader in ${downloaders[@]}; do
         query_start=${start_date["$downloader"]}
         query_end=${end_date["$downloader"]}
     fi
-    ./downloader.expect $downloader "$query_start" "$query_end"
+    /app/downloader.expect $downloader "$query_start" "$query_end"
 done

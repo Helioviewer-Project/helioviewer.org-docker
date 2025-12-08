@@ -11,6 +11,7 @@ git clone --recurse-submodules https://github.com/Helioviewer-Project/helioviewe
 cd helioviewer.org-docker
 mv .env.example .env
 docker compose up -d --wait
+./manage.sh init
 ```
 
 It may take a while for the containers to be built and the application to start up.
@@ -20,6 +21,8 @@ Once the output from docker settles down, check that it's running by going to ht
 
 Configuration is made via the `.env` file. By default this is set to
 bind and run everything on localhost. You can change this by editing `.env`
+After modifying .env, you may need to re-run `./manage.sh init` to apply
+new env settings. You also may need to restart services via `docker compose up` again.
 
 # Testing
 For contributors to this environment, you can write tests to verify that the

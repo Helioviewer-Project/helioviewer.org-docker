@@ -1,4 +1,4 @@
-FROM dgarciabriseno/helioviewer-api-dev
+FROM ghcr.io/helioviewer-project/php
 RUN <<END_OF_COMMANDS
 apt update
 apt install -y ruby tcsh

@@ -1,0 +1,63 @@
+name: 'Helioviewer Docker Setup'
+description: 'Setup and start Helioviewer Docker containers'
+
+inputs:
+  docker-ref:
+    description: 'Git ref to checkout for helioviewer.org-docker repository'
+    required: false
+    default: 'main'
+  api-ref:
+    description: 'Git ref to checkout for api submodule'
+    required: false
+    default: 'main'
+  helioviewer-org-ref:
+    description: 'Git ref to checkout for helioviewer.org submodule'
+    required: false
+    default: 'main'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout helioviewer.org-docker repository
+      uses: actions/checkout@v4
+      with:
+        repository: helioviewer-project/helioviewer.org-docker
+        ref: ${{ inputs.docker-ref }}
+        path: helioviewer.org-docker
+        submodules: true
+
+    - name: Checkout api submodule ref
+      shell: bash
+      working-directory: helioviewer.org-docker
+      run: cd api && git checkout ${{ inputs.api-ref }} && git submodule update --init --recursive
+
+    - name: Checkout helioviewer.org submodule ref
+      shell: bash
+      working-directory: helioviewer.org-docker
+      run: cd helioviewer.org && git checkout ${{ inputs.helioviewer-org-ref }} && git submodule update --init --recursive
+
+    - name: Install expect
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y expect
+
+    - name: Setup environment and start containers
+      shell: bash
+      working-directory: helioviewer.org-docker
+      run: |
+        cp .env.example .env && \
+        echo "UID=$(id -u)" >> .env && \
+        echo "GID=$(id -g)" >> .env && \
+        mkdir -p data/jp2 data/cache data/log && \
+        ./manage.sh init && \
+        ./manage.sh npm_install && \
+        ./manage.sh build_js_css && \
+        docker compose up --wait && \
+        ./manage.sh download_test_data && \
+        mkdir -p data/jp2/push && \
+        cp compose/*.jp2 data/jp2/push/ && \
+        expect -c "
+          set timeout -1
+          spawn ./manage.sh downloader -d local -b local -m localmove -s \"2021-01-01 00:00:00\" -e \"2022-01-01 00:00:00\"
+          expect \"Sleeping for 30 minutes\"
+          exit 0
+        "
