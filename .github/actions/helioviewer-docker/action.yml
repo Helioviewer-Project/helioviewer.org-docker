@@ -29,12 +29,20 @@ runs:
     - name: Checkout api submodule ref
       shell: bash
       working-directory: helioviewer.org-docker
-      run: cd api && git checkout ${{ inputs.api-ref }} && git submodule update --init --recursive
+      run: |
+        cd api
+        git fetch origin ${{ inputs.api-ref }}
+        git checkout FETCH_HEAD
+        git submodule update --init --recursive
 
     - name: Checkout helioviewer.org submodule ref
       shell: bash
       working-directory: helioviewer.org-docker
-      run: cd helioviewer.org && git checkout ${{ inputs.helioviewer-org-ref }} && git submodule update --init --recursive
+      run: |
+        cd helioviewer.org
+        git fetch origin ${{ inputs.helioviewer-org-ref }}
+        git checkout FETCH_HEAD
+        git submodule update --init --recursive
 
     - name: Install expect
       shell: bash
