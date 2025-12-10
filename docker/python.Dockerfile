@@ -10,8 +10,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     mariadb-client \
     && rm -rf /var/lib/apt/lists/* \
     && tar xzf kdu.tar.gz -C /tmp \
-    && mv /tmp/bin/* /bin \
-    && mv /tmp/lib/* /lib \
-    && pip install --no-cache-dir numpy==2.3.0 sunpy==6.1.1 glymur==0.14.2 matplotlib==3.10.3 scipy==1.15.3 mysql-connector-python==9.3.0
+    && cp /tmp/bin/* /bin \
+    && cp /tmp/lib/* /lib \
+    && mv /tmp/bin/* /usr/local/bin \
+    && mv /tmp/lib/* /usr/local/lib \
+    && pip install --no-cache-dir numpy==2.3.5 \
+                                  sunpy==7.1.0 \
+                                  Glymur==0.14.4 \
+                                  matplotlib==3.10.7 \
+                                  scipy==1.16.3 \
+                                  mysql-connector-python==9.5.0 \
+                                  pytest==9.0.2 \
+                                  responses==0.25.8 \
+                                  reproject==0.19.0 \
+                                  mpl-animators==1.2.4 \
+                                  beautifulsoup4==4.14.3 \
+                                  drms==0.9.0 \
+                                  zeep==4.3.2
 
 ENTRYPOINT [ "python" ]

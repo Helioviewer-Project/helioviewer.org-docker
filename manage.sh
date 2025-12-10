@@ -17,6 +17,7 @@ usage() {
     echo "  watch_3d           Watch and rebuild 3D JavaScript on changes"
     echo "  downloader         Run the Helioviewer data downloader"
     echo "  download_test_data Download test data for development"
+    echo "  pytest             Run pytest tests in the Python container"
     echo ""
 }
 
@@ -299,6 +300,23 @@ download_test_data() {
         /app/download_test_data.sh
 }
 
+# Run pytest tests
+pytest() {
+    echo "Running pytest tests..."
+    load_env
+
+    docker run --rm \
+        --user "${UID}:$(id -g)" \
+        --network helioviewer_default \
+        -e HOME=/tmp \
+        -e PYTEST_API_HOST=api \
+        -v "${SCRIPT_DIR}/api:/app" \
+        -v "${HOST_JPEG2000_PATH}:/tmp/jp2" \
+        -w /app/install \
+        ghcr.io/helioviewer-project/python \
+        -m pytest
+}
+
 # Main command dispatcher
 case "$1" in
     init)
@@ -326,6 +344,10 @@ case "$1" in
         ;;
     download_test_data)
         download_test_data
+        ;;
+    pytest)
+        shift
+        pytest "$@"
         ;;
     *)
         echo "Error: Unknown command '$1'"
