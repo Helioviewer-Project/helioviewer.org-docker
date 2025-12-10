@@ -260,6 +260,7 @@ downloader() {
         --env-file "${SCRIPT_DIR}/.env" \
         --platform=linux/x86_64 \
         -e HOME=/tmp \
+        -e HV_DATA_PATH="${HV_DATA_PATH}" \
         -v "${SCRIPT_DIR}/api/install:/app" \
         -v "${HOST_JPEG2000_PATH}:/tmp/jp2" \
         ghcr.io/helioviewer-project/python \

@@ -60,7 +60,6 @@ runs:
         ./manage.sh npm_install && \
         ./manage.sh build_js_css && \
         docker compose up --wait && \
-        ./manage.sh download_test_data && \
         mkdir -p data/jp2/push && \
         cp compose/*.jp2 data/jp2/push/ && \
         expect -c "
@@ -68,4 +67,5 @@ runs:
           spawn ./manage.sh downloader -d local -b local -m localmove -s \"2021-01-01 00:00:00\" -e \"2022-01-01 00:00:00\"
           expect \"Sleeping for 30 minutes\"
           exit 0
-        "
+        " && \
+        ./manage.sh download_test_data

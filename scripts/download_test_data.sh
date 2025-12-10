@@ -7,10 +7,21 @@
 
 declare -A start_date
 declare -A end_date
+declare -A hv_url
 
 # IRIS jpeg2000s are not publicly retrievable and cannot be tested here.
 # kcor is not active and has a bug at the time of writing where XML can't be parsed.
-downloaders=(kcor halpha jsoc rob xrt hv_soho hv_stereo suvi solar_orbiter hv_rhessi)
+downloaders=(kcor halpha aia hmi rob xrt hv_soho hv_stereo suvi solar_orbiter hv_rhessi)
+
+# Helioviewer.org JP2 URL lookup table
+hv_url["kcor"]="https://helioviewer.org/jp2/KCor"
+hv_url["halpha"]="https://helioviewer.org/jp2/NSO-GONG"
+hv_url["aia"]="https://helioviewer.org/jp2/AIA"
+hv_url["hmi"]="https://helioviewer.org/jp2/HMI"
+hv_url["rob"]="https://helioviewer.org/jp2/SWAP"
+hv_url["xrt"]="https://helioviewer.org/jp2/XRT"
+hv_url["suvi"]="https://helioviewer.org/jp2/SUVI"
+hv_url["solar_orbiter"]="https://helioviewer.org/jp2/FSI"
 
 # optional date ranges.
 # default is 3 months ago
@@ -46,5 +57,13 @@ for downloader in ${downloaders[@]}; do
         query_start=${start_date["$downloader"]}
         query_end=${end_date["$downloader"]}
     fi
-    /app/downloader.expect $downloader "$query_start" "$query_end"
+
+    # Check if downloader has an HV URL defined
+    if [ -n "${hv_url["$downloader"]}" ]; then
+        # Use the hv downloader with HV_DATA_PATH environment variable
+        HV_DATA_PATH="${hv_url["$downloader"]}" /app/downloader.expect hv "$query_start" "$query_end"
+    else
+        # Use the downloader directly
+        /app/downloader.expect $downloader "$query_start" "$query_end"
+    fi
 done
