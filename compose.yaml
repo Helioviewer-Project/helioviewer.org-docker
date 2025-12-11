@@ -150,6 +150,7 @@ services:
       - <<: *cache-mount
         target: /var/www/html/cache
   movies:
+    user: "${UID:-1000}:${GID:-1000}"
     env_file:
       - .env
     restart: always
