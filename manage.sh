@@ -199,6 +199,10 @@ init() {
     echo "-------------------------------------------"
 
     init_composer
+
+    # Files required for API tests
+    load_env
+    cp compose/*.jpg $HOST_JPEG2000_PATH
 }
 
 # Run composer in the API container
