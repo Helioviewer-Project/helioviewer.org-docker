@@ -202,7 +202,7 @@ init() {
 
     # Files required for API tests
     load_env
-    cp compose/*.jpg $HOST_JPEG2000_PATH
+    cp compose/*.jp2 $HOST_JPEG2000_PATH
 }
 
 # Run composer in the API container
