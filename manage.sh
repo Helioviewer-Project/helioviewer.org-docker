@@ -10,6 +10,7 @@ usage() {
     echo ""
     echo "Available commands:"
     echo "  init               Initialize settings for Docker environment"
+    echo "  init_everything    Run init, npm_install, build_js_css, and create data directories"
     echo "  composer           Run composer commands in the API container"
     echo "  npm_install        Install npm dependencies for web client"
     echo "  build_js_css       Build JavaScript and CSS for web client"
@@ -18,6 +19,8 @@ usage() {
     echo "  downloader         Run the Helioviewer data downloader"
     echo "  download_test_data Download test data for development"
     echo "  pytest             Run pytest tests in the Python container"
+    echo "  init_superset      Initialize Superset database and default roles/permissions"
+    echo "  prepare-dashboard  Prepare a dashboard export zip file for import"
     echo ""
 }
 
@@ -205,6 +208,39 @@ init() {
     cp compose/*.jp2 $HOST_JPEG2000_PATH
 }
 
+# Initialize everything: run init, npm_install, build_js_css, and create data directories
+init_everything() {
+    echo "Running full initialization..."
+    echo "-------------------------------------------"
+
+    # Load environment variables
+    load_env
+
+    # Create necessary data directories
+    echo "Creating data directories..."
+    mkdir -p "${HOST_JPEG2000_PATH}" "${HOST_CACHE_PATH}" "${HOST_LOG_PATH}"
+    echo "Data directories created: ${HOST_JPEG2000_PATH}, ${HOST_CACHE_PATH}, ${HOST_LOG_PATH}"
+    echo "-------------------------------------------"
+
+    # Run init
+    init
+    echo "-------------------------------------------"
+
+    # Install npm dependencies
+    npm_install
+    echo "-------------------------------------------"
+
+    # Build JavaScript and CSS
+    build_js_css
+    echo "-------------------------------------------"
+
+    # Initialize Superset
+    init_superset
+
+    echo "-------------------------------------------"
+    echo "Full initialization completed successfully!"
+}
+
 # Run composer in the API container
 composer() {
     docker compose exec api /usr/bin/composer "$@"
@@ -321,10 +357,89 @@ pytest() {
         -m pytest
 }
 
+# Initialize Superset
+init_superset() {
+    echo "Initializing Superset database and default roles/permissions..."
+    load_env
+
+    docker compose exec superset superset db upgrade && \
+    docker compose exec superset superset init && \
+    docker compose exec superset superset fab create-admin \
+        --username "${SUPERSET_ADMIN_USER}" \
+        --firstname Admin \
+        --lastname User \
+        --email admin@localhost \
+        --password "${SUPERSET_ADMIN_PASS}" && \
+    docker compose cp superset/dashboards_prepared.zip superset:/tmp/dashboards.zip && \
+    docker compose exec superset superset import-dashboards -p /tmp/dashboards.zip -u admin
+}
+
+# Prepare dashboard export zip file for import
+prepare_dashboard() {
+    local zip_file="$1"
+
+    if [ -z "${zip_file}" ]; then
+        echo "Error: No zip file specified"
+        echo "Usage: $0 prepare-dashboard <path-to-dashboard.zip>"
+        exit 1
+    fi
+
+    if [ ! -f "${zip_file}" ]; then
+        echo "Error: File '${zip_file}' not found"
+        exit 1
+    fi
+
+    echo "Preparing dashboard export from ${zip_file}..."
+    load_env
+
+    # Create temporary directory
+    local temp_dir=$(mktemp -d)
+    echo "Using temporary directory: ${temp_dir}"
+
+    # Unzip the file
+    echo "Extracting dashboard export..."
+    unzip -q "${zip_file}" -d "${temp_dir}"
+
+    # Find and edit the databases YAML file
+    local db_yaml="${temp_dir}/dashboard_export_"*"/databases/Helioviewer_Daily.yaml"
+    if [ -f ${db_yaml} ]; then
+        echo "Updating database configuration in ${db_yaml}..."
+        sed -i.bak "s|^sqlalchemy_uri:.*|sqlalchemy_uri: mysql://${SUPERSET_READ_USER}:${SUPERSET_READ_PASS}@${HV_DB_HOST}:3306/${HV_DB_NAME}|" ${db_yaml}
+        rm -f "${db_yaml}.bak"
+    else
+        echo "Warning: Database YAML file not found at expected path"
+    fi
+
+    # Find and edit the datasets data.yaml file
+    local dataset_yaml="${temp_dir}/dashboard_export_"*"/datasets/Helioviewer_Daily/data.yaml"
+    if [ -f ${dataset_yaml} ]; then
+        echo "Updating dataset schema in ${dataset_yaml}..."
+        sed -i.bak "s|^schema: helioviewer|schema: ${HV_DB_NAME}|" ${dataset_yaml}
+        rm -f "${dataset_yaml}.bak"
+    else
+        echo "Warning: Dataset YAML file not found at expected path"
+    fi
+
+    # Create output zip file
+    local output_file="${SCRIPT_DIR}/superset/dashboards_prepared.zip"
+    echo "Creating prepared dashboard export at ${output_file}..."
+    cd "${temp_dir}" && zip -q -r "${output_file}" .
+
+    # Clean up temporary directory
+    echo "Cleaning up temporary directory..."
+    rm -rf "${temp_dir}"
+
+    echo "Dashboard export prepared successfully at ${output_file}"
+    echo "You can now import this file into Superset"
+}
+
 # Main command dispatcher
 case "$1" in
     init)
         init
+        ;;
+    init_everything)
+        init_everything
         ;;
     composer)
         shift
@@ -352,6 +467,13 @@ case "$1" in
     pytest)
         shift
         pytest "$@"
+        ;;
+    init_superset)
+        init_superset
+        ;;
+    prepare-dashboard)
+        shift
+        prepare_dashboard "$@"
         ;;
     *)
         echo "Error: Unknown command '$1'"
