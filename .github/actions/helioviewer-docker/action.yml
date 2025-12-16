@@ -55,10 +55,7 @@ runs:
         cp .env.example .env && \
         echo "UID=$(id -u)" >> .env && \
         echo "GID=$(id -g)" >> .env && \
-        mkdir -p data/jp2 data/cache data/log && \
-        ./manage.sh init && \
-        ./manage.sh npm_install && \
-        ./manage.sh build_js_css && \
+        ./manage.sh init_everything && \
         docker compose up --wait && \
         mkdir -p data/jp2/push && \
         cp compose/*.jp2 data/jp2/push/ && \

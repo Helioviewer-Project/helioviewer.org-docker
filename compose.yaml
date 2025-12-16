@@ -48,6 +48,9 @@ services:
     image: mariadb
     environment:
       MARIADB_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${SUPERSET_DB_NAME}
+      MARIADB_USER: ${SUPERSET_DB_USER}
+      MARIADB_PASSWORD: ${SUPERSET_DB_PASS}
     restart: always
     healthcheck:
       test: ["CMD", "bash", "/usr/local/bin/healthcheck.sh", "--connect"]
@@ -61,15 +64,14 @@ services:
   # Initialize database service with application data and credentials
   # TODO: move this to manage.sh
   database-init:
+    env_file:
+      - .env
     image: ghcr.io/helioviewer-project/python
     build:
       dockerfile: docker/python.Dockerfile
     platform: linux/x86_64
     environment:
       MARIADB_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
-      HV_DB_NAME: ${HV_DB_NAME}
-      HV_DB_USER: ${HV_DB_USER}
-      HV_DB_PASS: ${HV_DB_PASS}
     volumes:
       - *jp2-mount
       - *install-mount
@@ -83,6 +85,11 @@ services:
   redis:
     image: redis
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
   # Supporting python api for the helioviewer api
   coordinator:
     restart: always
@@ -102,11 +109,11 @@ services:
       database-init:
         condition: service_completed_successfully
       database:
-        condition: service_started
+        condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       coordinator:
-        condition: service_started
+        condition: service_healthy
     restart: always
     platform: linux/amd64
     healthcheck:
@@ -136,7 +143,7 @@ services:
       database-init:
         condition: service_completed_successfully
       api:
-        condition: service_started
+        condition: service_healthy
     restart: always
     healthcheck:
       # Check every 10 seconds, wait up to 2 minutes
@@ -159,10 +166,52 @@ services:
       database-init:
         condition: service_completed_successfully
       redis:
-        condition: service_started
+        condition: service_healthy
     build:
       dockerfile: docker/movies.Dockerfile
     platform: linux/amd64
     volumes_from:
       - api
+  superset:
+    user: "${UID:-1000}:${GID:-1000}"
+    image: ghcr.io/helioviewer-project/superset
+    ports:
+      - 127.0.0.1:8088:8088
+    environment:
+      SUPERSET_CONFIG_PATH: /app/superset_config.py
+    volumes:
+      - type: bind
+        source: ${SUPERSET_CONFIG_FILE}
+        target: /app/superset_config.py
+    depends_on:
+      database-init:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+  superset-worker:
+    user: "${UID:-1000}:${GID:-1000}"
+    image: ghcr.io/helioviewer-project/superset
+    command: ["/app/.venv/bin/celery", "--app=superset.tasks.celery_app:app", "worker", "--pool=prefork", "-O", "fair", "-c", "2"]
+    environment:
+      SUPERSET_CONFIG_PATH: /app/superset_config.py
+    healthcheck:
+      test: ["CMD", "/app/.venv/bin/celery", "--app=superset.tasks.celery_app:app", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - type: bind
+        source: ${SUPERSET_CONFIG_FILE}
+        target: /app/superset_config.py
+    depends_on:
+      database-init:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 

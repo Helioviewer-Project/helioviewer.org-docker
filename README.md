@@ -9,9 +9,12 @@ Once installed clone this repo and run docker compose:
 ```bash
 git clone --recurse-submodules https://github.com/Helioviewer-Project/helioviewer.org-docker.git
 cd helioviewer.org-docker
-mv .env.example .env
-docker compose up -d --wait
+cp .env.example .env
 ./manage.sh init
+./manage.sh npm_install  # For web client
+./manage.sh build_js_css # For web client
+docker compose up -d --wait
+./manage.sh init_superset # For apache superset service
 ```
 
 It may take a while for the containers to be built and the application to start up.

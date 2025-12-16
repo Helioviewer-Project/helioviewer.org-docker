@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-dev:
     runs-on: ubuntu-latest
@@ -29,11 +33,7 @@ jobs:
 
       - name: Print logs
         if: always()
-        run: |
-          docker logs helioviewer-api-1
-          docker logs helioviewer-web-1
-          docker logs helioviewer-database-1
-          docker logs helioviewer-movies-1
+        run: docker compose logs
 
       - name: Test Helioviewer environment
         working-directory: helioviewer.org-docker
