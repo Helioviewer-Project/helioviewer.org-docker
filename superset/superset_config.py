@@ -1,6 +1,7 @@
 from datetime import timedelta
 from redis import Redis
 import pymysql
+import os
 pymysql.install_as_MySQLdb()
 
 SECRET_KEY = 'customsecret'
@@ -12,6 +13,15 @@ FEATURE_FLAGS = {
     "ENABLE_TEMPLATE_PROCESSING": True,
     "ESCAPE_MARKDOWN_HTML": False,
     "EMBEDDED_SUPERSET": True
+}
+
+# Enable CORS
+ENABLE_CORS = True
+# Get API_URL from environment variable and allow it in CORS
+API_URL = os.environ.get('API_URL', 'http://127.0.0.1:8081')
+CORS_OPTIONS = {
+    'supports_credentials': True,
+    'origins': [API_URL, "http://localhost:8081"],
 }
 
 # Flask-WTF flag for CSRF
@@ -35,6 +45,42 @@ DATA_CACHE_CONFIG = {
     'CACHE_KEY_PREFIX': 'superset_data_cache',
     'CACHE_REDIS_URL': 'redis://redis:6379/8'
 }
+
+# JWT Algorithm - MUST be RS256 for RSA keys
+GUEST_TOKEN_JWT_ALGO = "RS256"
+GUEST_TOKEN_JWT_AUDIENCE = os.environ.get('SUPERSET_GUEST_JWT_AUD', 'helioviewer_audience')
+# JWT Public Key for verifying tokens
+# Copy the entire contents of yourkey.pem here
+GUEST_TOKEN_JWT_SECRET =
+# Guest role name - this role must exist in Superset
+GUEST_ROLE_NAME = "Gamma"
+
+# 1. Enable server-side sessions
+SESSION_SERVER_SIDE = True
+# 2. Choose your backend (e.g., 'redis', 'memcached', 'filesystem', 'sqlalchemy')
+SESSION_TYPE = 'redis'
+# 3. Configure your Redis connection
+# Use environment variables for sensitive details
+SESSION_REDIS = Redis(
+    host="redis",
+    port=6379,
+    db=9
+)
+
+# 4. Ensure the session cookie is signed for integrity
+SESSION_USE_SIGNER = True
+
+# Set a short absolute session timeout
+# The default is 31 days, which is NOT recommended for production.
+PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
+
+# Enforce secure cookie flags to prevent browser-based attacks
+SESSION_COOKIE_SECURE = False      # (Set to True for production) Transmit cookie only over HTTPS
+SESSION_COOKIE_HTTPONLY = True     # Prevent client-side JS from accessing the cookie
+SESSION_COOKIE_SAMESITE = "None"   # For HTTP development. Use "None" with Secure=True for production HTTPS
+
+# Increase dashboard size limit
+SUPERSET_DASHBOARD_POSITION_DATA_LIMIT = 250000
 
 # Needed for Handlebars to work
 TALISMAN_ENABLED = False
@@ -69,38 +115,54 @@ TALISMAN_CONFIG = {
     "session_cookie_secure": False,
 }
 
-# JWT Algorithm - MUST be RS256 for RSA keys
-GUEST_TOKEN_JWT_ALGO = "RS256"
-GUEST_TOKEN_JWT_AUDIENCE = "superset_audience"
-# JWT Public Key for verifying tokens
-# Copy the entire contents of yourkey.pem here
-GUEST_TOKEN_JWT_SECRET = "your jwt secret"
-# Guest role name - this role must exist in Superset
-GUEST_ROLE_NAME = "Public"
+#
+# Custom Public Role Configuration
+#
+def FLASK_APP_MUTATOR(app):
+    """
+    Called at app startup to customize the Public role with specific permissions
+    """
+    from superset import security_manager
 
-# 1. Enable server-side sessions
-SESSION_SERVER_SIDE = True
-# 2. Choose your backend (e.g., 'redis', 'memcached', 'filesystem', 'sqlalchemy')
-SESSION_TYPE = 'redis'
-# 3. Configure your Redis connection
-# Use environment variables for sensitive details
-SESSION_REDIS = Redis(
-    host="redis",
-    port=6379,
-    db=9
-)
+    # Create a custom role with specific permissions for Public
+    custom_public_role = security_manager.add_role("CustomPublic")
 
-# 4. Ensure the session cookie is signed for integrity
-SESSION_USE_SIGNER = True
+    # Define the exact permissions for the Public role
+    desired_permissions = [
+        ("can_read", "Chart"),
+        ("can_read", "Dashboard"),
+        ("can_read", "DashboardPermalinkRestApi"),
+        ("can_read", "EmbeddedDashboard"),
+        ("can_dashboard_permalink", "Superset"),
+        ("can_slice", "Superset"),
+        ("can_explore_json", "Superset"),
+        ("can_dashboard", "Superset"),
+        ("all_datasource_access", "all_datasource_access"),
+    ]
 
-# Set a short absolute session timeout
-# The default is 31 days, which is NOT recommended for production.
-PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
+    # Create permissions if they don't exist and collect them
+    pvms = []
+    for permission_name, view_menu_name in desired_permissions:
+        security_manager.add_permission_view_menu(permission_name, view_menu_name)
+        pvm = security_manager.find_permission_view_menu(permission_name, view_menu_name)
+        if pvm:
+            pvms.append(pvm)
 
-# Enforce secure cookie flags to prevent browser-based attacks
-SESSION_COOKIE_SECURE = False      # (Set to True for production) Transmit cookie only over HTTPS
-SESSION_COOKIE_HTTPONLY = True     # Prevent client-side JS from accessing the cookie
-SESSION_COOKIE_SAMESITE = "Strict" # Provide protection against CSRF attacks
+    # Set only these permissions on the CustomPublic role
+    custom_public_role.permissions = pvms
+    security_manager.get_session.commit()
 
-# Increase dashboard size limit
-SUPERSET_DASHBOARD_POSITION_DATA_LIMIT = 250000
+# Tell Superset to copy permissions from CustomPublic to Public
+PUBLIC_ROLE_LIKE = "CustomPublic"
+
+# Custom Security Manager to allow RS256 algorithm for guest tokens
+from superset.security.manager import SupersetSecurityManager
+from jwt import PyJWT
+
+class CustomSecurityManager(SupersetSecurityManager):
+    def __init__(self, appbuilder):
+        super().__init__(appbuilder)
+        # Create a PyJWT instance with RS256 explicitly in allowed algorithms
+        self.pyjwt_for_guest_token = PyJWT(options={"verify_signature": True})
+
+CUSTOM_SECURITY_MANAGER = CustomSecurityManager

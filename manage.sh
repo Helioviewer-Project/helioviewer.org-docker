@@ -10,7 +10,9 @@ usage() {
     echo ""
     echo "Available commands:"
     echo "  init               Initialize settings for Docker environment"
-    echo "  init_everything    Run init, npm_install, build_js_css, and create data directories"
+    echo "  preup              Run init, npm_install, build_js_css, and create data directories. Do this before docker compose up"
+    echo "  postup             Populates database. Do this after docker compose up"
+    echo "  up                 Shorthand for preup, docker compose up, postup"
     echo "  composer           Run composer commands in the API container"
     echo "  npm_install        Install npm dependencies for web client"
     echo "  build_js_css       Build JavaScript and CSS for web client"
@@ -21,6 +23,7 @@ usage() {
     echo "  pytest             Run pytest tests in the Python container"
     echo "  init_superset      Initialize Superset database and default roles/permissions"
     echo "  prepare-dashboard  Prepare a dashboard export zip file for import"
+    echo "  gen-superset-pk    Generate RSA private/public key pair for Superset guest tokens"
     echo ""
 }
 
@@ -209,8 +212,8 @@ init() {
 }
 
 # Initialize everything: run init, npm_install, build_js_css, and create data directories
-init_everything() {
-    echo "Running full initialization..."
+preup() {
+    echo "Running pre initialization..."
     echo "-------------------------------------------"
 
     # Load environment variables
@@ -234,11 +237,20 @@ init_everything() {
     build_js_css
     echo "-------------------------------------------"
 
-    # Initialize Superset
-    init_superset
-
+    # Generate superset private key
+    gen_superset_pk
     echo "-------------------------------------------"
-    echo "Full initialization completed successfully!"
+}
+
+postup() {
+    init_superset
+}
+
+up() {
+    set -e
+    preup
+    docker compose up --wait
+    postup
 }
 
 # Run composer in the API container
@@ -372,6 +384,79 @@ init_superset() {
         --password "${SUPERSET_ADMIN_PASS}" && \
     docker compose cp superset/dashboards_prepared.zip superset:/tmp/dashboards.zip && \
     docker compose exec superset superset import-dashboards -p /tmp/dashboards.zip -u admin
+    echo $SUPERSET_ADMIN_PASS | ${SCRIPT_DIR}/superset/enable_embedding.sh "http://127.0.0.1:8088" $SUPERSET_ADMIN_USER .env
+    docker compose down superset-guest && docker compose up superset-guest -d
+}
+
+# Generate RSA private/public key pair for Superset guest tokens
+gen_superset_pk() {
+    echo "Generating RSA private/public key pair for Superset guest tokens..."
+
+    # Load environment variables
+    load_env
+
+    local private_key="${SUPERSET_GUEST_PK}"
+    local public_key="${SUPERSET_GUEST_PK}.pub"
+    local config_file="${SUPERSET_CONFIG_FILE}"
+
+    # Check if private key already exists
+    if [ -f "${private_key}" ]; then
+        echo "Warning: Private key already exists at ${private_key}"
+        read -p "Overwrite existing key pair? This will invalidate existing tokens. (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "Cancelled. Existing keys were not modified."
+            exit 0
+        fi
+    fi
+
+    # Generate RSA private key (4096 bits)
+    echo "Generating RSA private key (4096 bits)..."
+    openssl genrsa -out "${private_key}" 4096
+
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to generate private key"
+        exit 1
+    fi
+
+    # Extract public key from private key
+    echo "Extracting public key..."
+    openssl rsa -in "${private_key}" -pubout -out "${public_key}"
+
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to extract public key"
+        exit 1
+    fi
+
+    # Update superset_config.py with the public key
+    echo "Updating ${config_file} with public key..."
+
+    # Use awk to replace the GUEST_TOKEN_JWT_SECRET line with the public key
+    # Pass public key as ARGV to handle multiline content on macOS
+    awk 'BEGIN {
+            pubkey=ARGV[1]
+            delete ARGV[1]
+        }
+        /^GUEST_TOKEN_JWT_SECRET =/ {
+            print "GUEST_TOKEN_JWT_SECRET = \"\"\"" pubkey "\"\"\""
+            next
+        }
+        { print }
+    ' "$(cat "${public_key}")" "${config_file}" > "${config_file}.tmp" && mv "${config_file}.tmp" "${config_file}"
+
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to update superset_config.py"
+        exit 1
+    fi
+
+    echo "-------------------------------------------"
+    echo "RSA key pair generated successfully!"
+    echo "Private key: ${private_key}"
+    echo "Public key:  ${public_key}"
+    echo ""
+    echo "The public key has been added to ${config_file}"
+    echo "Make sure to restart Superset for the changes to take effect."
+    echo "-------------------------------------------"
 }
 
 # Prepare dashboard export zip file for import
@@ -438,8 +523,14 @@ case "$1" in
     init)
         init
         ;;
-    init_everything)
-        init_everything
+    preup)
+        preup
+        ;;
+    postup)
+        postup
+        ;;
+    up)
+        up
         ;;
     composer)
         shift
@@ -474,6 +565,9 @@ case "$1" in
     prepare-dashboard)
         shift
         prepare_dashboard "$@"
+        ;;
+    gen-superset-pk)
+        gen_superset_pk
         ;;
     *)
         echo "Error: Unknown command '$1'"
