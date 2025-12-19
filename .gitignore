@@ -4,3 +4,6 @@ test_setup_done
 secrets
 .env
 data
+superset/pk.*
+superset/cookies.tmp
+cookies.tmp

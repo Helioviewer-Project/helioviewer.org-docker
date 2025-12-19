@@ -101,8 +101,25 @@ function createJWT($payload, $privateKeyPath, $algorithm = 'RS256') {
 /**
  * Generate guest token payload
  */
-function generateGuestTokenPayload($dashboardId, $audience, $expiration) {
+function generateGuestTokenPayload($dashboardIds, $audience, $expiration) {
     $now = time();
+
+    // Build resources array - empty if no dashboard IDs provided
+    $resources = [];
+    if ($dashboardIds !== null) {
+        // Ensure $dashboardIds is an array
+        if (!is_array($dashboardIds)) {
+            $dashboardIds = [$dashboardIds];
+        }
+
+        // Add each dashboard ID to resources
+        foreach ($dashboardIds as $dashboardId) {
+            $resources[] = [
+                "type" => "dashboard",
+                "id" => $dashboardId
+            ];
+        }
+    }
 
     return [
         // User information
@@ -113,12 +130,7 @@ function generateGuestTokenPayload($dashboardId, $audience, $expiration) {
         ],
 
         // Resources this token grants access to
-        'resources' => [
-          [
-            "type" => "dashboard",
-            "id" => $dashboardId
-          ]
-        ],
+        'resources' => $resources,
 
         // Row Level Security rules (empty = no restrictions)
         'rls_rules' => [],
@@ -145,27 +157,26 @@ try {
         exit;
     }
 
-    // Get dashboard ID from request body
+    // Get dashboard ID(s) from request body (optional)
     $input = json_decode(file_get_contents('php://input'), true);
     $DASHBOARD_ID = $input['dashboard_id'] ?? null;
 
-    if (!$DASHBOARD_ID) {
-        http_response_code(400);
-        echo json_encode([
-            'error' => 'dashboard_id is required in request body',
-            'success' => false
-        ]);
-        exit;
-    }
+    // Validate dashboard ID(s) against allowed list only if provided and allowed list is not empty
+    if ($DASHBOARD_ID !== null && !empty($ALLOWED_DASHBOARDS)) {
+        // Ensure $DASHBOARD_ID is an array for consistent validation
+        $dashboardIdsToValidate = is_array($DASHBOARD_ID) ? $DASHBOARD_ID : [$DASHBOARD_ID];
 
-    // Validate dashboard ID against allowed list (if not empty)
-    if (!empty($ALLOWED_DASHBOARDS) && !in_array($DASHBOARD_ID, $ALLOWED_DASHBOARDS)) {
-        http_response_code(403);
-        echo json_encode([
-            'error' => 'Dashboard ID not allowed',
-            'success' => false
-        ]);
-        exit;
+        // Check each dashboard ID against the allowed list
+        foreach ($dashboardIdsToValidate as $id) {
+            if (!in_array($id, $ALLOWED_DASHBOARDS)) {
+                http_response_code(403);
+                echo json_encode([
+                    'error' => "Dashboard ID '$id' not allowed",
+                    'success' => false
+                ]);
+                exit;
+            }
+        }
     }
 
     // Validate configuration

@@ -55,8 +55,7 @@ runs:
         cp .env.example .env && \
         echo "UID=$(id -u)" >> .env && \
         echo "GID=$(id -g)" >> .env && \
-        ./manage.sh init_everything && \
-        docker compose up --wait && \
+        ./manage.sh up && \
         mkdir -p data/jp2/push && \
         cp compose/*.jp2 data/jp2/push/ && \
         expect -c "

@@ -64,14 +64,17 @@ services:
   # Initialize database service with application data and credentials
   # TODO: move this to manage.sh
   database-init:
-    env_file:
-      - .env
     image: ghcr.io/helioviewer-project/python
     build:
       dockerfile: docker/python.Dockerfile
     platform: linux/x86_64
     environment:
       MARIADB_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+      SUPERSET_READ_USER: ${SUPERSET_READ_USER}
+      SUPERSET_READ_PASS: ${SUPERSET_READ_PASS}
+      HV_DB_NAME: ${HV_DB_NAME}
+      HV_DB_USER: ${HV_DB_USER}
+      HV_DB_PASS: ${HV_DB_PASS}
     volumes:
       - *jp2-mount
       - *install-mount
@@ -97,8 +100,12 @@ services:
     ports:
       - 127.0.0.1:${COORDINATOR_PORT}:80
   api:
-    env_file:
-      - .env
+    environment:
+      HV_REDIS_HOST: ${HV_REDIS_HOST}
+      HV_DB_HOST: ${HV_DB_HOST}
+      HV_DB_NAME: ${HV_DB_NAME}
+      HV_DB_USER: ${HV_DB_USER}
+      HV_DB_PASS: ${HV_DB_PASS}
     image: ghcr.io/helioviewer-project/php
     build:
       dockerfile: docker/php.Dockerfile
@@ -132,10 +139,13 @@ services:
         target: /var/www/api.helioviewer.org/docroot/cache
       - *log-mount
   web:
-    env_file:
-      - .env
     environment:
       APACHE_DOCUMENT_ROOT: /var/www/html
+      HV_REDIS_HOST: ${HV_REDIS_HOST}
+      HV_DB_HOST: ${HV_DB_HOST}
+      HV_DB_NAME: ${HV_DB_NAME}
+      HV_DB_USER: ${HV_DB_USER}
+      HV_DB_PASS: ${HV_DB_PASS}
     image: ghcr.io/helioviewer-project/php
     ports:
       - 127.0.0.1:${CLIENT_PORT}:80
@@ -158,8 +168,12 @@ services:
         target: /var/www/html/cache
   movies:
     user: "${UID:-1000}:${GID:-1000}"
-    env_file:
-      - .env
+    environment:
+      HV_REDIS_HOST: ${HV_REDIS_HOST}
+      HV_DB_HOST: ${HV_DB_HOST}
+      HV_DB_NAME: ${HV_DB_NAME}
+      HV_DB_USER: ${HV_DB_USER}
+      HV_DB_PASS: ${HV_DB_PASS}
     restart: always
     image: ghcr.io/helioviewer-project/movie-worker
     depends_on:
@@ -179,6 +193,8 @@ services:
       - 127.0.0.1:8088:8088
     environment:
       SUPERSET_CONFIG_PATH: /app/superset_config.py
+      SUPERSET_GUEST_JWT_AUD: ${SUPERSET_GUEST_JWT_AUD}
+      API_URL: ${API_URL}
     volumes:
       - type: bind
         source: ${SUPERSET_CONFIG_FILE}
@@ -194,8 +210,11 @@ services:
     user: "${UID:-1000}:${GID:-1000}"
     image: ghcr.io/helioviewer-project/superset
     command: ["/app/.venv/bin/celery", "--app=superset.tasks.celery_app:app", "worker", "--pool=prefork", "-O", "fair", "-c", "2"]
+    restart: always
     environment:
       SUPERSET_CONFIG_PATH: /app/superset_config.py
+      SUPERSET_GUEST_JWT_AUD: ${SUPERSET_GUEST_JWT_AUD}
+      API_URL: ${API_URL}
     healthcheck:
       test: ["CMD", "/app/.venv/bin/celery", "--app=superset.tasks.celery_app:app", "inspect", "ping"]
       interval: 30s
@@ -207,11 +226,27 @@ services:
         source: ${SUPERSET_CONFIG_FILE}
         target: /app/superset_config.py
     depends_on:
-      database-init:
-        condition: service_completed_successfully
-      database:
+      superset:
         condition: service_healthy
-      redis:
+  superset-guest:
+    image: php:apache
+    ports:
+      - 127.0.0.1:8087:80
+    environment:
+      SUPERSET_GUEST_PK: /app/keys/pk.pem
+      SUPERSET_GUEST_JWT_AUD: ${SUPERSET_GUEST_JWT_AUD}
+      SUPERSET_GUEST_ALLOWED_DASHBOARDS: ${SUPERSET_GUEST_ALLOWED_DASHBOARDS}
+    volumes:
+      - type: bind
+        source: ${PWD}/superset/api
+        target: /var/www/html
+      - type: bind
+        source: ${SUPERSET_GUEST_PK}
+        target: /app/keys/pk.pem
+        read_only: true
+    restart: always
+    depends_on:
+      superset:
         condition: service_healthy
 
 
