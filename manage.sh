@@ -322,6 +322,19 @@ download_test_data() {
     # Load environment variables from .env file
     load_env
 
+    # Create push directory if it doesn't exist
+    mkdir -p "${HOST_JPEG2000_PATH}/push"
+
+    # Download and extract the test data tarball
+    echo "Downloading test data tarball from https://helioviewer.org/jp2/sample.tar.gz..."
+    curl -L -o /tmp/sample.tar.gz https://helioviewer.org/jp2/sample.tar.gz
+
+    echo "Extracting test data to ${HOST_JPEG2000_PATH}/push/..."
+    tar -xzf /tmp/sample.tar.gz -C "${HOST_JPEG2000_PATH}/push/"
+    rm -f /tmp/sample.tar.gz
+
+    echo "Processing test data with downloader..."
+    # Run the downloader to process the extracted files
     docker run --rm \
         --init \
         --stop-timeout 0 \
@@ -329,15 +342,20 @@ download_test_data() {
         --user "${UID}:$(id -g)" \
         --env-file "${SCRIPT_DIR}/.env" \
         --platform=linux/x86_64 \
-        --entrypoint /bin/bash \
+        --entrypoint /bin/sh \
         -e HOME=/tmp \
-        -w /app/install \
-        -v "${SCRIPT_DIR}/scripts/download_test_data.sh:/app/download_test_data.sh" \
-        -v "${SCRIPT_DIR}/scripts/downloader.expect:/app/downloader.expect" \
-        -v "${SCRIPT_DIR}/api/install:/app/install" \
+        -e HV_DATA_PATH="${HV_DATA_PATH}" \
+        -v "${SCRIPT_DIR}/api/install:/app" \
         -v "${HOST_JPEG2000_PATH}:/tmp/jp2" \
         ghcr.io/helioviewer-project/python \
-        /app/download_test_data.sh
+        -c 'expect -c "
+          set timeout -1
+          spawn python3 /app/downloader.py -d local -b local -m localmove -s \"1900-01-01 00:00:00\" -e \"2100-01-01 00:00:00\"
+          expect \"Sleeping for 30 minutes\"
+          exit 0
+        "'
+
+    echo "Test data downloaded and processed successfully"
 }
 
 # Run pytest tests
