@@ -168,7 +168,7 @@ init_web_config() {
     sed -i.bak "s|'back_end'                  : \"https://api.helioviewer.org/\"|'back_end'                  : \"${API_URL}/\"|" "${config_file}"
     sed -i.bak "s|'web_root_url'              : \"https://helioviewer.org\"|'web_root_url'              : \"${CLIENT_URL}\"|" "${config_file}"
     sed -i.bak "s|'user_video_feed'           : \"https://api.helioviewer.org/\"|'user_video_feed'           : \"${API_URL}/\"|" "${config_file}"
-    sed -i.bak "s|'coordinator_url'           : 'https://api.helioviewer.org/coordinate'|'coordinator_url'           : '${COORDINATOR_URL}/coordinate'|" "${config_file}"
+    sed -i.bak "s|'coordinator_url'           : 'https://api.helioviewer.org/coordinate'|'coordinator_url'           : '${COORDINATOR_URL}'|" "${config_file}"
 
     # Clean up backup file
     rm -f "${config_file}.bak"
