@@ -57,12 +57,4 @@ runs:
         echo "GID=$(id -g)" >> .env && \
         ./manage.sh init_everything && \
         docker compose up --wait && \
-        mkdir -p data/jp2/push && \
-        cp compose/*.jp2 data/jp2/push/ && \
-        expect -c "
-          set timeout -1
-          spawn ./manage.sh downloader -d local -b local -m localmove -s \"2021-01-01 00:00:00\" -e \"2022-01-01 00:00:00\"
-          expect \"Sleeping for 30 minutes\"
-          exit 0
-        " && \
         ./manage.sh download_test_data
