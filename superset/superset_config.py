@@ -1,10 +1,17 @@
 from datetime import timedelta
 from redis import Redis
+import os
 import pymysql
 pymysql.install_as_MySQLdb()
 
 SECRET_KEY = 'customsecret'
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://superset:superset@database/superset'
+
+# Read database connection details from environment variables
+db_user = os.environ.get('SUPERSET_DB_USER', 'superset')
+db_pass = os.environ.get('SUPERSET_DB_PASS', 'superset')
+db_host = os.environ.get('SUPERSET_DB_HOST', 'postgres')
+db_name = os.environ.get('SUPERSET_DB_NAME', 'superset')
+SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{db_user}:{db_pass}@{db_host}/{db_name}'
 RATELIMIT_STORAGE_URI = "redis://redis:6379/5"
 HTML_SANITIZATION = False
 FEATURE_FLAGS = {

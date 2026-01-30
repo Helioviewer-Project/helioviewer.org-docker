@@ -42,15 +42,14 @@ x-volumes:
 volumes:
   # To persist database data
   db_volume:
+  # PostgreSQL data for Superset
+  postgres_volume:
 
 services:
   database:
     image: mariadb
     environment:
       MARIADB_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
-      MARIADB_DATABASE: ${SUPERSET_DB_NAME}
-      MARIADB_USER: ${SUPERSET_DB_USER}
-      MARIADB_PASSWORD: ${SUPERSET_DB_PASS}
     restart: always
     healthcheck:
       test: ["CMD", "bash", "/usr/local/bin/healthcheck.sh", "--connect"]
@@ -90,6 +89,24 @@ services:
       interval: 5s
       timeout: 3s
       retries: 3
+  # PostgreSQL database for Superset metadata
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${SUPERSET_DB_NAME}
+      POSTGRES_USER: ${SUPERSET_DB_USER}
+      POSTGRES_PASSWORD: ${SUPERSET_DB_PASS}
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - type: volume
+        source: postgres_volume
+        target: /var/lib/postgresql/data
   # Supporting python api for the helioviewer api
   coordinator:
     restart: always
@@ -179,6 +196,10 @@ services:
       - 127.0.0.1:8088:8088
     environment:
       SUPERSET_CONFIG_PATH: /app/superset_config.py
+      SUPERSET_DB_HOST: ${SUPERSET_DB_HOST}
+      SUPERSET_DB_USER: ${SUPERSET_DB_USER}
+      SUPERSET_DB_PASS: ${SUPERSET_DB_PASS}
+      SUPERSET_DB_NAME: ${SUPERSET_DB_NAME}
     volumes:
       - type: bind
         source: ${SUPERSET_CONFIG_FILE}
@@ -188,6 +209,8 @@ services:
         condition: service_completed_successfully
       database:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
   superset-worker:
@@ -196,6 +219,10 @@ services:
     command: ["/app/.venv/bin/celery", "--app=superset.tasks.celery_app:app", "worker", "--pool=prefork", "-O", "fair", "-c", "2"]
     environment:
       SUPERSET_CONFIG_PATH: /app/superset_config.py
+      SUPERSET_DB_HOST: ${SUPERSET_DB_HOST}
+      SUPERSET_DB_USER: ${SUPERSET_DB_USER}
+      SUPERSET_DB_PASS: ${SUPERSET_DB_PASS}
+      SUPERSET_DB_NAME: ${SUPERSET_DB_NAME}
     healthcheck:
       test: ["CMD", "/app/.venv/bin/celery", "--app=superset.tasks.celery_app:app", "inspect", "ping"]
       interval: 30s
@@ -210,6 +237,8 @@ services:
       database-init:
         condition: service_completed_successfully
       database:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
