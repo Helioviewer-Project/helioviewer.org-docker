@@ -402,7 +402,6 @@ init_superset() {
         --password "${SUPERSET_ADMIN_PASS}" && \
     docker compose cp superset/dashboards_prepared.zip superset:/tmp/dashboards.zip && \
     docker compose exec superset superset import-dashboards -p /tmp/dashboards.zip -u admin
-    echo $SUPERSET_ADMIN_PASS | ${SCRIPT_DIR}/superset/enable_embedding.sh "http://127.0.0.1:8088" $SUPERSET_ADMIN_USER .env
     docker compose down superset-guest && docker compose up superset-guest -d
 }
 
@@ -455,7 +454,7 @@ gen_superset_pk() {
             pubkey=ARGV[1]
             delete ARGV[1]
         }
-        /^GUEST_TOKEN_JWT_SECRET =/ {
+        /^# GUEST_TOKEN_JWT_SECRET =/ {
             print "GUEST_TOKEN_JWT_SECRET = \"\"\"" pubkey "\"\"\""
             next
         }

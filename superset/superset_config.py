@@ -58,7 +58,8 @@ GUEST_TOKEN_JWT_ALGO = "RS256"
 GUEST_TOKEN_JWT_AUDIENCE = os.environ.get('SUPERSET_GUEST_JWT_AUD', 'helioviewer_audience')
 # JWT Public Key for verifying tokens
 # Copy the entire contents of yourkey.pem here
-GUEST_TOKEN_JWT_SECRET =
+# GUEST_TOKEN_JWT_SECRET =
+
 # Guest role name - this role must exist in Superset
 GUEST_ROLE_NAME = "Gamma"
 
@@ -130,6 +131,7 @@ def FLASK_APP_MUTATOR(app):
     Called at app startup to customize the Public role with specific permissions
     """
     from superset import security_manager
+    from superset.extensions import db
 
     # Create a custom role with specific permissions for Public
     custom_public_role = security_manager.add_role("CustomPublic")
@@ -157,19 +159,19 @@ def FLASK_APP_MUTATOR(app):
 
     # Set only these permissions on the CustomPublic role
     custom_public_role.permissions = pvms
-    security_manager.get_session.commit()
+    db.session.commit()
 
 # Tell Superset to copy permissions from CustomPublic to Public
 PUBLIC_ROLE_LIKE = "CustomPublic"
 
-# Custom Security Manager to allow RS256 algorithm for guest tokens
-from superset.security.manager import SupersetSecurityManager
-from jwt import PyJWT
-
-class CustomSecurityManager(SupersetSecurityManager):
-    def __init__(self, appbuilder):
-        super().__init__(appbuilder)
-        # Create a PyJWT instance with RS256 explicitly in allowed algorithms
-        self.pyjwt_for_guest_token = PyJWT(options={"verify_signature": True})
-
-CUSTOM_SECURITY_MANAGER = CustomSecurityManager
+# # Custom Security Manager to allow RS256 algorithm for guest tokens
+# from superset.security.manager import SupersetSecurityManager
+# from jwt import PyJWT
+#
+# class CustomSecurityManager(SupersetSecurityManager):
+#     def __init__(self, appbuilder):
+#         super().__init__(appbuilder)
+#         # Create a PyJWT instance with RS256 explicitly in allowed algorithms
+#         self.pyjwt_for_guest_token = PyJWT(options={"verify_signature": True})
+#
+# CUSTOM_SECURITY_MANAGER = CustomSecurityManager
