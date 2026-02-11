@@ -36,7 +36,9 @@ load_env() {
         exit 1
     fi
 
-    source "${env_file}"
+    # Source .env file but filter out UID and GID to avoid readonly variable errors
+    # UID and GID are readonly in bash but needed in .env for docker-compose
+    source <(grep -v '^UID=' "${env_file}" | grep -v '^GID=')
 }
 
 # Check if file should be overwritten
