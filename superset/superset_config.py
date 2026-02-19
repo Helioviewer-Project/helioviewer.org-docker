@@ -9,7 +9,7 @@ import pymysql
 pymysql.install_as_MySQLdb()
 
 SECRET_KEY = 'customsecret'
-GLOBAL_ASYNC_QUERIES_JWT_SECRET = "changeme"
+GLOBAL_ASYNC_QUERIES_JWT_SECRET = "changemechangemechangemechangemechangemechangemechangemechangeme"
 
 # Read database connection details from environment variables
 db_user = os.environ.get('SUPERSET_DB_USER', 'superset')
