@@ -1,11 +1,15 @@
+import os
 from datetime import timedelta
+
+from cachelib.redis import RedisCache
 from redis import Redis
-import os
+
+# Install PyMySQL as MySQLdb for MySQL database connections in SQL Lab
 import pymysql
-import os
 pymysql.install_as_MySQLdb()
 
 SECRET_KEY = 'customsecret'
+GLOBAL_ASYNC_QUERIES_JWT_SECRET = "changemechangemechangemechangemechangemechangemechangemechangeme"
 
 # Read database connection details from environment variables
 db_user = os.environ.get('SUPERSET_DB_USER', 'superset')
@@ -13,13 +17,14 @@ db_pass = os.environ.get('SUPERSET_DB_PASS', 'superset')
 db_host = os.environ.get('SUPERSET_DB_HOST', 'postgres')
 db_name = os.environ.get('SUPERSET_DB_NAME', 'superset')
 SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{db_user}:{db_pass}@{db_host}/{db_name}'
-RATELIMIT_STORAGE_URI = "redis://redis:6379/5"
+RATELIMIT_STORAGE_URI = "redis://redis:6379/1"
 HTML_SANITIZATION = False
 FEATURE_FLAGS = {
     'DASHBOARD_RBAC': True,
     "ENABLE_TEMPLATE_PROCESSING": True,
     "ESCAPE_MARKDOWN_HTML": False,
-    "EMBEDDED_SUPERSET": True
+    "EMBEDDED_SUPERSET": True,
+    "GLOBAL_ASYNC_QUERIES": True
 }
 
 # Enable CORS
@@ -39,9 +44,9 @@ WTF_CSRF_TIME_LIMIT = 7200
 
 # Enable Long Queries with CELERY
 class CeleryConfig(object):
-    broker_url = "redis://redis:6379/6"
+    broker_url = "redis://redis:6379/2"
     imports = ("superset.tasks.scheduler")
-    result_backend = "redis://localhost:6379/7"
+    result_backend = "redis://redis:6379/3"
     worker_prefetch_multiplier = 10
     task_acks_late = True
 CELERY_CONFIG = CeleryConfig
@@ -50,8 +55,11 @@ DATA_CACHE_CONFIG = {
     'CACHE_TYPE': 'RedisCache',
     'CACHE_DEFAULT_TIMEOUT': 86400,
     'CACHE_KEY_PREFIX': 'superset_data_cache',
-    'CACHE_REDIS_URL': 'redis://redis:6379/8'
+    'CACHE_REDIS_URL': 'redis://redis:6379/4'
 }
+
+# Results backend for async queries in SQLLab
+RESULTS_BACKEND = RedisCache(host="redis", port=6379, db=5, key_prefix="superset_results")
 
 # JWT Algorithm - MUST be RS256 for RSA keys
 GUEST_TOKEN_JWT_ALGO = "RS256"
@@ -72,7 +80,7 @@ SESSION_TYPE = 'redis'
 SESSION_REDIS = Redis(
     host="redis",
     port=6379,
-    db=9
+    db=6
 )
 
 # 4. Ensure the session cookie is signed for integrity
