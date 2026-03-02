@@ -38,7 +38,9 @@ load_env() {
 
     # Source .env file but filter out UID and GID to avoid readonly variable errors
     # UID and GID are readonly in bash but needed in .env for docker-compose
-    source <(grep -v '^UID=' "${env_file}" | grep -v '^GID=')
+    grep -v '^UID=' "${env_file}" | grep -v '^GID=' > ..env
+    source ..env
+    rm ..env
 }
 
 # Check if file should be overwritten
@@ -424,8 +426,8 @@ gen_superset_pk() {
         read -p "Overwrite existing key pair? This will invalidate existing tokens. (y/N): " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            echo "Cancelled. Existing keys were not modified."
-            exit 0
+            echo "Skipping key generation. Existing keys were not modified."
+            return 0
         fi
     fi
 
