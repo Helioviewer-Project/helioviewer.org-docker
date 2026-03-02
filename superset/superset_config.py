@@ -17,7 +17,7 @@ db_pass = os.environ.get('SUPERSET_DB_PASS', 'superset')
 db_host = os.environ.get('SUPERSET_DB_HOST', 'postgres')
 db_name = os.environ.get('SUPERSET_DB_NAME', 'superset')
 SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{db_user}:{db_pass}@{db_host}/{db_name}'
-RATELIMIT_STORAGE_URI = "redis://redis:6379/1"
+
 HTML_SANITIZATION = False
 FEATURE_FLAGS = {
     'DASHBOARD_RBAC': True,
@@ -42,49 +42,58 @@ WTF_CSRF_ENABLED = True
 WTF_CSRF_EXEMPT_LIST = []
 WTF_CSRF_TIME_LIMIT = 7200
 
+# -------------------------------------------------------
+# Redis Configuration
+# -------------------------------------------------------
+
+RATELIMIT_STORAGE_URI = "redis://redis:6379/2"
+
+GLOBAL_ASYNC_QUERIES_CACHE_BACKEND = {
+    "CACHE_TYPE": "RedisCache",
+    "CACHE_DEFAULT_TIMEOUT": 86400,
+    "CACHE_KEY_PREFIX": "superset_results",
+    "CACHE_REDIS_HOST": "redis",
+    "CACHE_REDIS_PORT": 6379,
+    "CACHE_REDIS_DB": 2,
+}
+
 # Enable Long Queries with CELERY
 class CeleryConfig(object):
     broker_url = "redis://redis:6379/2"
     imports = ("superset.tasks.scheduler")
-    result_backend = "redis://redis:6379/3"
+    result_backend = "redis://redis:6379/2"
     worker_prefetch_multiplier = 10
     task_acks_late = True
 CELERY_CONFIG = CeleryConfig
 
+CACHE_CONFIG = {
+    'CACHE_TYPE': 'RedisCache',
+    'CACHE_DEFAULT_TIMEOUT': 86400,
+    'CACHE_KEY_PREFIX': 'superset_cache_',
+    'CACHE_REDIS_URL': 'redis://redis:6379/2'
+}
+
 DATA_CACHE_CONFIG = {
     'CACHE_TYPE': 'RedisCache',
     'CACHE_DEFAULT_TIMEOUT': 86400,
-    'CACHE_KEY_PREFIX': 'superset_data_cache',
-    'CACHE_REDIS_URL': 'redis://redis:6379/4'
+    'CACHE_KEY_PREFIX': 'superset_data_cache_',
+    'CACHE_REDIS_URL': 'redis://redis:6379/2'
 }
 
-# Results backend for async queries in SQLLab
-RESULTS_BACKEND = RedisCache(host="redis", port=6379, db=5, key_prefix="superset_results")
+# Results backend must use the same key prefix as DATA_CACHE_CONFIG so that
+# Celery worker writes and web server reads resolve to the same Redis keys
+# for GLOBAL_ASYNC_QUERIES chart data results.
+RESULTS_BACKEND = RedisCache(host="redis", port=6379, db=2, key_prefix="superset_data_cache_")
 
-# JWT Algorithm - MUST be RS256 for RSA keys
-GUEST_TOKEN_JWT_ALGO = "RS256"
-GUEST_TOKEN_JWT_AUDIENCE = os.environ.get('SUPERSET_GUEST_JWT_AUD', 'helioviewer_audience')
-# JWT Public Key for verifying tokens
-# Copy the entire contents of yourkey.pem here
-# GUEST_TOKEN_JWT_SECRET =
-
-# Guest role name - this role must exist in Superset
-GUEST_ROLE_NAME = "Gamma"
-
-# 1. Enable server-side sessions
+# Server-side sessions backed by Redis
 SESSION_SERVER_SIDE = True
-# 2. Choose your backend (e.g., 'redis', 'memcached', 'filesystem', 'sqlalchemy')
 SESSION_TYPE = 'redis'
-# 3. Configure your Redis connection
-# Use environment variables for sensitive details
-SESSION_REDIS = Redis(
-    host="redis",
-    port=6379,
-    db=6
-)
-
-# 4. Ensure the session cookie is signed for integrity
+SESSION_REDIS = Redis(host="redis", port=6379, db=2)
 SESSION_USE_SIGNER = True
+
+# -------------------------------------------------------
+# Session Configuration
+# -------------------------------------------------------
 
 # Set a short absolute session timeout
 # The default is 31 days, which is NOT recommended for production.
@@ -94,6 +103,20 @@ PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
 SESSION_COOKIE_SECURE = False      # (Set to True for production) Transmit cookie only over HTTPS
 SESSION_COOKIE_HTTPONLY = True     # Prevent client-side JS from accessing the cookie
 SESSION_COOKIE_SAMESITE = "None"   # For HTTP development. Use "None" with Secure=True for production HTTPS
+
+# -------------------------------------------------------
+# JWT / Guest Token Configuration
+# -------------------------------------------------------
+
+# JWT Algorithm - MUST be RS256 for RSA keys
+GUEST_TOKEN_JWT_ALGO = "RS256"
+GUEST_TOKEN_JWT_AUDIENCE = os.environ.get('SUPERSET_GUEST_JWT_AUD', 'helioviewer_audience')
+# JWT Public Key for verifying tokens
+# Copy the entire contents of yourkey.pem here
+# GUEST_TOKEN_JWT_SECRET =
+
+# Guest role name - this role must exist in Superset
+GUEST_ROLE_NAME = "CustomPublic"
 
 # Increase dashboard size limit
 SUPERSET_DASHBOARD_POSITION_DATA_LIMIT = 250000
@@ -172,14 +195,3 @@ def FLASK_APP_MUTATOR(app):
 # Tell Superset to copy permissions from CustomPublic to Public
 PUBLIC_ROLE_LIKE = "CustomPublic"
 
-# # Custom Security Manager to allow RS256 algorithm for guest tokens
-# from superset.security.manager import SupersetSecurityManager
-# from jwt import PyJWT
-#
-# class CustomSecurityManager(SupersetSecurityManager):
-#     def __init__(self, appbuilder):
-#         super().__init__(appbuilder)
-#         # Create a PyJWT instance with RS256 explicitly in allowed algorithms
-#         self.pyjwt_for_guest_token = PyJWT(options={"verify_signature": True})
-#
-# CUSTOM_SECURITY_MANAGER = CustomSecurityManager

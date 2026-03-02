@@ -1,9 +1,9 @@
 name: 'Run Pytest API Tests'
-description: 'Execute pytest tests using ./manage.sh pytest'
+description: 'Execute pytest tests using ./manage pytest'
 
 inputs:
   working-directory:
-    description: 'Working directory containing manage.sh'
+    description: 'Working directory containing manage'
     required: false
     default: '.'
 
@@ -13,4 +13,4 @@ runs:
     - name: Run pytest tests
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: ./manage.sh pytest
+      run: ./manage pytest

@@ -10,11 +10,11 @@ Once installed clone this repo and run docker compose:
 git clone --recurse-submodules https://github.com/Helioviewer-Project/helioviewer.org-docker.git
 cd helioviewer.org-docker
 cp .env.example .env
-./manage.sh init
-./manage.sh npm_install  # For web client
-./manage.sh build_js_css # For web client
+./manage init
+./manage npm_install  # For web client
+./manage build_js_css # For web client
 docker compose up -d --wait
-./manage.sh init_superset # For apache superset service
+./manage init_superset # For apache superset service
 ```
 
 It may take a while for the containers to be built and the application to start up.
@@ -24,7 +24,7 @@ Once the output from docker settles down, check that it's running by going to ht
 
 Configuration is made via the `.env` file. By default this is set to
 bind and run everything on localhost. You can change this by editing `.env`
-After modifying .env, you may need to re-run `./manage.sh init` to apply
+After modifying .env, you may need to re-run `./manage init` to apply
 new env settings. You also may need to restart services via `docker compose up` again.
 
 # Testing

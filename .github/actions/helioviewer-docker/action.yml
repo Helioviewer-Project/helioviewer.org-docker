@@ -55,8 +55,8 @@ runs:
         cp .env.example .env \
         && echo "UID=$(id -u)" >> .env \
         && echo "GID=$(id -g)" >> .env \
-        && ./manage.sh up \
+        && ./manage up \
         && mkdir -p data/jp2/push \
         && cp compose/*.jp2 data/jp2/push/ \
-        && ./manage.sh downloader -d local -b local -m localmove -s \"2021-01-01 00:00:00\" -e \"2022-01-01 00:00:00\" \
-        && ./manage.sh download_test_data
+        && ./manage downloader -d local -b local -m localmove -s \"2021-01-01 00:00:00\" -e \"2022-01-01 00:00:00\" \
+        && ./manage download_test_data
