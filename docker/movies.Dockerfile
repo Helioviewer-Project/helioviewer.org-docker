@@ -13,4 +13,4 @@ END_OF_COMMANDS
 WORKDIR /var/www/api.helioviewer.org/scripts
 ENTRYPOINT ["/bin/bash", "-c"]
 ENV REDIS_BACKEND=redis:6379
-CMD ["tcsh movie_queue.tcsh && tail -F /dev/null"]
+CMD ["tcsh movie_queue.tcsh 2>&1 /var/log/movie_builder.log && tail -F /dev/null"]
