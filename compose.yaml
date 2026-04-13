@@ -113,7 +113,7 @@ services:
   # Supporting python api for the helioviewer api
   coordinator:
     restart: always
-    image: dgarciabriseno/hv-coordinator:0.3.3
+    image: ghcr.io/helioviewer-project/coordinator
     ports:
       - ${BIND_ADDRESS}:${COORDINATOR_PORT}:80
   api:
@@ -138,6 +138,8 @@ services:
         condition: service_healthy
       coordinator:
         condition: service_healthy
+      movies:
+        condition: service_started
     restart: always
     platform: linux/amd64
     healthcheck:
