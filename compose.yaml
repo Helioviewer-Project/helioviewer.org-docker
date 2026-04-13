@@ -203,8 +203,14 @@ services:
     build:
       dockerfile: docker/movies.Dockerfile
     platform: linux/amd64
-    volumes_from:
-      - api
+    volumes:
+      - *jp2-mount
+      - *api-mount
+      - <<: *cache-mount
+        target: /var/www/helioviewer.org/cache
+      - <<: *cache-mount
+        target: /var/www/api.helioviewer.org/docroot/cache
+      - *log-mount
   superset:
     user: "${UID:-1000}:${GID:-1000}"
     image: ghcr.io/helioviewer-project/superset
