@@ -252,7 +252,7 @@ postup() {
 up() {
     set -e
     preup
-    docker compose up --wait
+    docker compose up --wait web
     postup
 }
 
