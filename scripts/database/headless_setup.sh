@@ -1,6 +1,6 @@
 #!/usr/bin/expect -f
 
-set timeout 5
+set timeout 30
 set root_password $::env(MARIADB_ROOT_PASSWORD)
 set db_name $::env(HV_DB_NAME)
 set db_user $::env(HV_DB_USER)
