@@ -54,8 +54,8 @@ services:
     healthcheck:
       test: ["CMD", "bash", "/usr/local/bin/healthcheck.sh", "--connect"]
       interval: 5s
-      timeout: 5s
-      retries: 3
+      timeout: 30s
+      retries: 6
     volumes:
       - *jp2-mount
       - *install-mount
@@ -90,8 +90,8 @@ services:
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
-      timeout: 3s
-      retries: 3
+      retries: 6
+      timeout: 30s
   # PostgreSQL database for Superset metadata
   postgres:
     image: postgres:15
@@ -103,8 +103,8 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
       interval: 5s
-      timeout: 5s
-      retries: 5
+      retries: 6
+      timeout: 30s
       start_period: 10s
     volumes:
       - type: volume
@@ -144,8 +144,8 @@ services:
       # Check if Apache is responding on port 80
       test: ["CMD", "curl", "-f", "http://localhost/?action=getStatus"]
       interval: 10s
-      timeout: 5s
       retries: 6
+      timeout: 30s
       start_period: 5s
     volumes:
       - *jp2-mount
@@ -175,9 +175,9 @@ services:
     healthcheck:
       # Check every 10 seconds, wait up to 2 minutes
       test: ["CMD", "curl", "-f", "http://localhost/"]
-      interval: 10s
-      timeout: 1s
-      retries: 12
+      interval: 5s
+      timeout: 30s
+      retries: 6
     volumes:
       - *client-mount
       - *api-mount
@@ -244,9 +244,9 @@ services:
       API_URL: ${API_URL}
     healthcheck:
       test: ["CMD", "/app/.venv/bin/celery", "--app=superset.tasks.celery_app:app", "inspect", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 5s
+      timeout: 30s
+      retries: 6
       start_period: 30s
     volumes:
       - type: bind
