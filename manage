@@ -271,7 +271,7 @@ npm_install() {
         -e npm_config_cache=/tmp/.npm \
         -v "${SCRIPT_DIR}/helioviewer.org:/app" \
         -w /app \
-        node:lts \
+        ghcr.io/helioviewer-project/node \
         npm ci
 }
 
