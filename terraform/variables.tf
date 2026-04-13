@@ -7,21 +7,28 @@ variable "aws_region" {
 }
 
 variable "instance_type" {
-  description = "EC2 instance type. The full stack needs significant RAM; t3.xlarge (16 GB) is recommended."
+  description = "EC2 instance type. The full stack needs significant RAM; t3a.xlarge (16 GB) is recommended."
   type        = string
-  default     = "t3.xlarge"
+  default     = "t3a.xlarge"
 }
 
 variable "root_volume_size" {
   description = "Size of the root EBS volume in GB"
   type        = number
-  default     = 20
+  default     = 30
 }
 
 variable "ssh_allowed_cidr" {
   description = "CIDR range allowed to SSH to the instance. Defaults to anywhere; restrict to your IP for better security (e.g. \"203.0.113.5/32\")."
   type        = string
   default     = "0.0.0.0/0"
+}
+
+# ── Deployment identity ───────────────────────────────────────────────────────
+
+variable "deployment_name" {
+  description = "Unique name for this deployment. Used to namespace the key pair and security group so multiple deployments can coexist in the same AWS account (e.g. \"daniel-test\", \"ci-run-42\")."
+  type        = string
 }
 
 # ── Git remotes and branches ──────────────────────────────────────────────────

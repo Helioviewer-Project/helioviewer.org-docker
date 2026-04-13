@@ -67,7 +67,7 @@ git -C "$REPO/helioviewer.org" fetch origin && git -C "$REPO/helioviewer.org" ch
 chown -R ubuntu:ubuntu "$REPO"
 
 # ── 4. Write .env ─────────────────────────────────────────────────────────────
-# Terraform substitutes ${...} tokens; bash expands $PUBLIC_IP and $REPO at runtime.
+# Terraform substitutes $${...} tokens; bash expands $PUBLIC_IP and $REPO at runtime.
 cat > "$REPO/.env" <<ENVEOF
 # Bind to all interfaces so ports are reachable from outside the instance
 BIND_ADDRESS=0.0.0.0
@@ -109,10 +109,10 @@ ENVEOF
 
 chown ubuntu:ubuntu "$REPO/.env"
 
-# ── 5. Run manage.sh up as ubuntu ─────────────────────────────────────────────
+# ── 5. Run manage up as ubuntu ─────────────────────────────────────────────
 # Runs as ubuntu so Docker commands use the correct UID/GID (1000:1000)
 # for volume-mounted files. runuser -l creates a login shell which picks up
 # the docker group membership added above.
-runuser -l ubuntu -c "cd '$REPO' && ./manage.sh up"
+runuser -l ubuntu -c "cd '$REPO' && ./manage up"
 
 echo "=== Helioviewer bootstrap completed at $(date) ==="

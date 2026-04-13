@@ -19,6 +19,10 @@ provider "aws" {
   region = var.aws_region
 }
 
+locals {
+  instance_name = "helioviewer-${var.deployment_name}"
+}
+
 # ── SSH key pair ──────────────────────────────────────────────────────────────
 
 # Generate an Ed25519 key pair
@@ -28,14 +32,14 @@ resource "tls_private_key" "helioviewer" {
 
 # Register the public key with AWS
 resource "aws_key_pair" "helioviewer" {
-  key_name   = "helioviewer-key"
+  key_name   = "helioviewer-${var.deployment_name}-key"
   public_key = tls_private_key.helioviewer.public_key_openssh
 }
 
 # Save the private key locally as helioviewer.pem (chmod 400, never committed)
 resource "local_sensitive_file" "private_key" {
   content         = tls_private_key.helioviewer.private_key_openssh
-  filename        = "${path.module}/helioviewer.pem"
+  filename        = "${path.module}/helioviewer-${var.deployment_name}.pem"
   file_permission = "0400"
 }
 
@@ -58,7 +62,7 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_security_group" "helioviewer" {
-  name        = "helioviewer-sg"
+  name        = "helioviewer-${var.deployment_name}-sg"
   description = "Helioviewer EC2 security group"
 
   ingress {
@@ -118,7 +122,7 @@ resource "aws_security_group" "helioviewer" {
   }
 
   tags = {
-    Name = "helioviewer"
+    Name = local.instance_name
   }
 }
 
@@ -163,6 +167,6 @@ resource "aws_instance" "helioviewer" {
   })
 
   tags = {
-    Name = "helioviewer"
+    Name = local.instance_name
   }
 }

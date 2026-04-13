@@ -2,8 +2,9 @@
 # terraform.tfvars is gitignored — never commit it.
 
 # ── AWS ───────────────────────────────────────────────────────────────────────
-aws_region    = "us-east-1"
-instance_type = "t3.xlarge"
+aws_region      = "us-east-1"
+instance_type   = "t3a.xlarge"
+deployment_name = "your-name"  # Must be unique per deployment in the same AWS account
 
 # Restrict SSH access to your IP for better security, e.g. "203.0.113.5/32"
 # Default "0.0.0.0/0" allows SSH from anywhere.
