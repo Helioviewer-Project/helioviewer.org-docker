@@ -10,7 +10,7 @@ cookies.tmp
 
 # Terraform
 terraform/terraform.tfvars
-terraform/helioviewer.pem
+terraform/helioviewer-*.pem
 terraform/.terraform/
 terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
