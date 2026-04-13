@@ -7,7 +7,7 @@ set db_user $::env(HV_DB_USER)
 set db_pass $::env(HV_DB_PASS)
 spawn python3 install.py
 
-expect "Location" { send "/tmp/jp2\r" }
+expect "JP2 Images:" { send "/tmp/jp2\r" }
 expect "Choice" { send "1\r" }
 expect "Database" { send "$db_name\r" }
 expect "Username" { send "$db_user\r" }
