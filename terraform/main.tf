@@ -144,6 +144,7 @@ resource "aws_instance" "helioviewer" {
   }
 
   user_data = templatefile("${path.module}/bootstrap.sh", {
+    public_ip              = aws_eip.helioviewer.public_ip
     git_docker_remote      = var.git_docker_remote
     git_docker_branch      = var.git_docker_branch
     git_api_remote         = var.git_api_remote
@@ -169,4 +170,23 @@ resource "aws_instance" "helioviewer" {
   tags = {
     Name = local.instance_name
   }
+}
+
+# ── Elastic IP ────────────────────────────────────────────────────────────────
+
+# Allocate a static public IP. Because this is declared as a separate resource,
+# Terraform knows its address before creating the instance and can pass it into
+# the bootstrap script via templatefile(). The IP survives instance type changes.
+resource "aws_eip" "helioviewer" {
+  domain = "vpc"
+
+  tags = {
+    Name = local.instance_name
+  }
+}
+
+# Bind the EIP to the instance after it is created.
+resource "aws_eip_association" "helioviewer" {
+  instance_id   = aws_instance.helioviewer.id
+  allocation_id = aws_eip.helioviewer.id
 }

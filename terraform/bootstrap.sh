@@ -37,14 +37,10 @@ apt-get install -y \
 
 usermod -aG docker ubuntu
 
-# ── 2. Fetch public IP via IMDSv2 ─────────────────────────────────────────────
-# 169.254.169.254 is the EC2 Instance Metadata Service — only reachable from
-# within the instance. The PUT exchange is required by IMDSv2 to get a session
-# token before querying metadata.
-TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" \
-  -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-PUBLIC_IP=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" \
-  http://169.254.169.254/latest/meta-data/public-ipv4)
+# ── 2. Set public IP ──────────────────────────────────────────────────────────
+# Injected by Terraform from the aws_eip resource — stable across instance
+# type changes and recreations.
+PUBLIC_IP=${public_ip}
 
 echo "Public IP: $PUBLIC_IP"
 
