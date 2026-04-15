@@ -18,6 +18,8 @@ deployment_name = "your-name"  # Must be unique per deployment in the same AWS a
 # git_api_branch         = "main"
 # git_helioviewer_remote = "https://github.com/helioviewer-project/helioviewer.org"
 # git_helioviewer_branch = "main"
+# git_tests_remote       = "https://github.com/helioviewer-project/helioviewer.org-tests"
+# git_tests_branch       = "main"
 
 # ── Credentials — change all of these ────────────────────────────────────────
 database_root_password = "change-me-root"

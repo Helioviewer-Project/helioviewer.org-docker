@@ -69,6 +69,18 @@ variable "git_helioviewer_branch" {
   default     = "main"
 }
 
+variable "git_tests_remote" {
+  description = "Git remote URL for the helioviewer.org-tests repository"
+  type        = string
+  default     = "https://github.com/helioviewer-project/helioviewer.org-tests"
+}
+
+variable "git_tests_branch" {
+  description = "Branch to check out for the helioviewer.org-tests repository"
+  type        = string
+  default     = "main"
+}
+
 # ── Service ports ─────────────────────────────────────────────────────────────
 
 variable "api_port" {

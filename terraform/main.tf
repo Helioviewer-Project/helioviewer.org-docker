@@ -151,6 +151,8 @@ resource "aws_instance" "helioviewer" {
     git_api_branch         = var.git_api_branch
     git_helioviewer_remote = var.git_helioviewer_remote
     git_helioviewer_branch = var.git_helioviewer_branch
+    git_tests_remote       = var.git_tests_remote
+    git_tests_branch       = var.git_tests_branch
     api_port               = var.api_port
     client_port            = var.client_port
     coordinator_port       = var.coordinator_port

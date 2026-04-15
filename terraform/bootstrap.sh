@@ -18,7 +18,7 @@ echo "=== Helioviewer bootstrap started at $(date) ==="
 
 # ── 1. Install Docker CE + Compose plugin ─────────────────────────────────────
 apt-get update -y
-apt-get install -y ca-certificates curl gnupg git openssl
+apt-get install -y ca-certificates curl gnupg git openssl nodejs npm
 
 install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
@@ -110,5 +110,21 @@ chown ubuntu:ubuntu "$REPO/.env"
 # for volume-mounted files. runuser -l creates a login shell which picks up
 # the docker group membership added above.
 runuser -l ubuntu -c "cd '$REPO' && ./manage up"
+
+# ── 6. Clone and initialize test repository ───────────────────────────────────
+TESTS=/home/ubuntu/helioviewer.org-tests
+
+git clone --branch ${git_tests_branch} ${git_tests_remote} "$TESTS"
+
+# Point playwright at the deployed client port (Terraform substitutes ${client_port} before this runs)
+sed -i 's|http://localhost:8080|http://${public_ip}:${client_port}|g' "$TESTS/playwright.config.ts"
+
+chown -R ubuntu:ubuntu "$TESTS"
+
+# npm install runs as ubuntu (no root needed)
+runuser -l ubuntu -c "cd '$TESTS' && npm install && npx playwright install"
+
+# playwright install --with-deps installs OS-level browser dependencies and must run as root
+npx --prefix "$TESTS" playwright install-deps
 
 echo "=== Helioviewer bootstrap completed at $(date) ==="
