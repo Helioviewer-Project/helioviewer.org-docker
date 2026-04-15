@@ -54,8 +54,8 @@ services:
     healthcheck:
       test: ["CMD", "bash", "/usr/local/bin/healthcheck.sh", "--connect"]
       interval: 5s
-      timeout: 5s
-      retries: 3
+      timeout: 30s
+      retries: 6
     volumes:
       - *jp2-mount
       - *install-mount
@@ -90,8 +90,8 @@ services:
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
-      timeout: 3s
-      retries: 3
+      retries: 6
+      timeout: 30s
   # PostgreSQL database for Superset metadata
   postgres:
     image: postgres:15
@@ -103,8 +103,8 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
       interval: 5s
-      timeout: 5s
-      retries: 5
+      retries: 6
+      timeout: 30s
       start_period: 10s
     volumes:
       - type: volume
@@ -113,9 +113,9 @@ services:
   # Supporting python api for the helioviewer api
   coordinator:
     restart: always
-    image: dgarciabriseno/hv-coordinator:0.3.3
+    image: ghcr.io/helioviewer-project/coordinator
     ports:
-      - 127.0.0.1:${COORDINATOR_PORT}:80
+      - ${BIND_ADDRESS}:${COORDINATOR_PORT}:80
   api:
     environment:
       HV_REDIS_HOST: ${HV_REDIS_HOST}
@@ -128,7 +128,7 @@ services:
       dockerfile: docker/php.Dockerfile
     user: "${UID:-1000}:${GID:-1000}"
     ports:
-      - 127.0.0.1:${API_PORT}:80
+      - ${BIND_ADDRESS}:${API_PORT}:80
     depends_on:
       database-init:
         condition: service_completed_successfully
@@ -138,14 +138,16 @@ services:
         condition: service_healthy
       coordinator:
         condition: service_healthy
+      movies:
+        condition: service_started
     restart: always
     platform: linux/amd64
     healthcheck:
       # Check if Apache is responding on port 80
       test: ["CMD", "curl", "-f", "http://localhost/?action=getStatus"]
       interval: 10s
-      timeout: 5s
-      retries: 6
+      retries: 10
+      timeout: 30s
       start_period: 5s
     volumes:
       - *jp2-mount
@@ -165,7 +167,7 @@ services:
       HV_DB_PASS: ${HV_DB_PASS}
     image: ghcr.io/helioviewer-project/php
     ports:
-      - 127.0.0.1:${CLIENT_PORT}:80
+      - ${BIND_ADDRESS}:${CLIENT_PORT}:80
     depends_on:
       database-init:
         condition: service_completed_successfully
@@ -175,9 +177,9 @@ services:
     healthcheck:
       # Check every 10 seconds, wait up to 2 minutes
       test: ["CMD", "curl", "-f", "http://localhost/"]
-      interval: 10s
-      timeout: 1s
-      retries: 12
+      interval: 5s
+      timeout: 30s
+      retries: 6
     volumes:
       - *client-mount
       - *api-mount
@@ -201,13 +203,19 @@ services:
     build:
       dockerfile: docker/movies.Dockerfile
     platform: linux/amd64
-    volumes_from:
-      - api
+    volumes:
+      - *jp2-mount
+      - *api-mount
+      - <<: *cache-mount
+        target: /var/www/helioviewer.org/cache
+      - <<: *cache-mount
+        target: /var/www/api.helioviewer.org/docroot/cache
+      - *log-mount
   superset:
     user: "${UID:-1000}:${GID:-1000}"
     image: ghcr.io/helioviewer-project/superset
     ports:
-      - 127.0.0.1:8088:8088
+      - ${BIND_ADDRESS}:8088:8088
     environment:
       SUPERSET_CONFIG_PATH: /app/superset_config.py
       SUPERSET_DB_HOST: ${SUPERSET_DB_HOST}
@@ -244,9 +252,9 @@ services:
       API_URL: ${API_URL}
     healthcheck:
       test: ["CMD", "/app/.venv/bin/celery", "--app=superset.tasks.celery_app:app", "inspect", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 5s
+      timeout: 30s
+      retries: 6
       start_period: 30s
     volumes:
       - type: bind
@@ -260,7 +268,7 @@ services:
   superset-guest:
     image: php:apache
     ports:
-      - 127.0.0.1:8087:80
+      - ${BIND_ADDRESS}:8087:80
     environment:
       SUPERSET_GUEST_PK: /app/keys/pk.pem
       SUPERSET_GUEST_JWT_AUD: ${SUPERSET_GUEST_JWT_AUD}

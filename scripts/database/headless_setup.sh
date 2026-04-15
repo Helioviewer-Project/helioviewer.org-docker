@@ -1,13 +1,13 @@
 #!/usr/bin/expect -f
 
-set timeout 5
+set timeout 30
 set root_password $::env(MARIADB_ROOT_PASSWORD)
 set db_name $::env(HV_DB_NAME)
 set db_user $::env(HV_DB_USER)
 set db_pass $::env(HV_DB_PASS)
 spawn python3 install.py
 
-expect "Location" { send "/tmp/jp2\r" }
+expect "JP2 Images:" { send "/tmp/jp2\r" }
 expect "Choice" { send "1\r" }
 expect "Database" { send "$db_name\r" }
 expect "Username" { send "$db_user\r" }

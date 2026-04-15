@@ -1,0 +1,39 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is gitignored — never commit it.
+
+# ── AWS ───────────────────────────────────────────────────────────────────────
+aws_region      = "us-east-1"
+instance_type   = "t3a.xlarge"
+deployment_name = "your-name"  # Must be unique per deployment in the same AWS account
+
+# Restrict SSH access to your IP for better security, e.g. "203.0.113.5/32"
+# Default "0.0.0.0/0" allows SSH from anywhere.
+# ssh_allowed_cidr = "0.0.0.0/0"
+
+# ── Git remotes and branches (override to use forks) ─────────────────────────
+# Defaults point to the official Helioviewer repositories on main.
+# git_docker_remote      = "https://github.com/helioviewer-project/helioviewer.org-docker"
+# git_docker_branch      = "main"
+# git_api_remote         = "https://github.com/helioviewer-project/api"
+# git_api_branch         = "main"
+# git_helioviewer_remote = "https://github.com/helioviewer-project/helioviewer.org"
+# git_helioviewer_branch = "main"
+# git_tests_remote       = "https://github.com/helioviewer-project/helioviewer.org-tests"
+# git_tests_branch       = "main"
+
+# ── Credentials — change all of these ────────────────────────────────────────
+database_root_password = "change-me-root"
+
+hv_db_name = "helioviewer"
+hv_db_user = "helioviewer"
+hv_db_pass = "change-me-hv"
+
+superset_db_name = "superset"
+superset_db_user = "superset"
+superset_db_pass = "change-me-superset-db"
+
+superset_admin_user = "admin"
+superset_admin_pass = "change-me-superset-admin"
+
+superset_read_user = "readonly"
+superset_read_pass = "change-me-readonly"
