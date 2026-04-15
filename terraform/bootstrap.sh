@@ -109,7 +109,7 @@ chown ubuntu:ubuntu "$REPO/.env"
 # Runs as ubuntu so Docker commands use the correct UID/GID (1000:1000)
 # for volume-mounted files. runuser -l creates a login shell which picks up
 # the docker group membership added above.
-runuser -l ubuntu -c "cd '$REPO' && ./manage up"
+runuser -l ubuntu -c "cd '$REPO' && ./manage up && ./manage download_test_data"
 
 # ── 6. Clone and initialize test repository ───────────────────────────────────
 TESTS=/home/ubuntu/helioviewer.org-tests
