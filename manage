@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Helioviewer.org Docker Management Script
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
