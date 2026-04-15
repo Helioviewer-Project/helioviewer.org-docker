@@ -15,7 +15,7 @@ output "private_key_file" {
 
 output "ssh_command" {
   description = "SSH command to connect to the instance"
-  value       = "ssh -i ${local_sensitive_file.private_key.filename} ubuntu@${aws_eip.helioviewer.public_ip}"
+  value       = "ssh -L localhost:9323:localhost:9323 -i ${local_sensitive_file.private_key.filename} ubuntu@${aws_eip.helioviewer.public_ip}"
 }
 
 output "bootstrap_log" {
