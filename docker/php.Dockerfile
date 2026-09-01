@@ -1,6 +1,6 @@
 FROM php:8.2.30-apache
 
-ENV IMAGEMAGICK_VER=7.1.2-18
+ENV IMAGEMAGICK_VER=6.9.13-55
 ENV FFMPEG_VER=8.1
 
 # Install API dependencies
@@ -12,12 +12,13 @@ COPY api/install/kakadu/Kakadu_v6_4_1-00781N_Linux-64-bit-Compiled.tar.gz kdu.ta
 RUN <<EOF
 apt update
 apt install -y unzip libpng-dev libjpeg-dev libfreetype-dev libmariadb-dev
-curl -s --output imagemagick.zip -X GET https://codeload.github.com/ImageMagick/ImageMagick/zip/refs/tags/$IMAGEMAGICK_VER
+# When upgrading to ImageMagick 7, remove the trailing "6" from the repo name below (ImageMagick6 -> ImageMagick)
+curl -s --output imagemagick.zip -X GET https://codeload.github.com/ImageMagick/ImageMagick6/zip/refs/tags/$IMAGEMAGICK_VER
 unzip imagemagick.zip
 rm imagemagick.zip
-cd ImageMagick-$IMAGEMAGICK_VER && ./configure && make -j$(nproc) && make install && ldconfig
+cd ImageMagick6-$IMAGEMAGICK_VER && ./configure && make -j$(nproc) && make install && ldconfig
 cd ..
-rm -rf ImageMagick-$IMAGEMAGICK_VER
+rm -rf ImageMagick6-$IMAGEMAGICK_VER
 curl --output ffmpeg-$FFMPEG_VER.tar.xz https://ffmpeg.org/releases/ffmpeg-$FFMPEG_VER.tar.xz
 tar xf ffmpeg-$FFMPEG_VER.tar.xz
 rm ffmpeg-$FFMPEG_VER.tar.xz
