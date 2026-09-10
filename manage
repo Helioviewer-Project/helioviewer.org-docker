@@ -19,6 +19,7 @@ usage() {
     echo "  watch_3d           Watch and rebuild 3D JavaScript on changes"
     echo "  downloader         Run the Helioviewer data downloader"
     echo "  download_test_data Download test data for development"
+    echo "  check_jp2          Look up the datasource info for a given JPEG2000 file"
     echo "  pytest             Run pytest tests in the Python container"
     echo "  init_superset      Initialize Superset database and default roles/permissions"
     echo "  prepare-dashboard  Prepare a dashboard export zip file for import"
@@ -124,7 +125,7 @@ init_config() {
         sed -i.bak 's|jp2_dir      = /var/www-api/docroot/jp2|jp2_dir      = /tmp/jp2|' "${config_file}"
         sed -i.bak "s|web_root_url     = http://localhost|web_root_url     = ${API_URL}|" "${config_file}"
         sed -i.bak "s|client_url       = http://helioviewer.org|client_url       = ${CLIENT_URL}|" "${config_file}"
-        sed -i.bak "s|coordinator_url = 'http://coordinator'|coordinator_url = 'http://coordinator'|" "${config_file}"
+        sed -i.bak "s|coordinator_url = 'http://coordinator'|coordinator_url = 'http://coordinator:8000'|" "${config_file}"
         sed -i.bak 's|/var/www-api/docroot|/var/www/api.helioviewer.org/docroot|g' "${config_file}"
 
         # Add CORS allowed origins
@@ -278,7 +279,7 @@ npm_install() {
 # Build JavaScript and CSS for web client
 build_js_css() {
     echo "Building JavaScript and CSS..."
-    docker run --rm \
+    podman run --rm \
         --user "${UID}:$(id -g)" \
         -e HOME=/tmp \
         -v "${SCRIPT_DIR}/helioviewer.org:/app/helioviewer.org" \
@@ -330,6 +331,44 @@ downloader() {
     docker wait "${container_id}" >/dev/null 2>&1
 }
 
+# Look up datasource info for a JPEG2000 file using get_jp2_info.py
+check_jp2() {
+    local jp2_file="$1"
+
+    if [ -z "${jp2_file}" ]; then
+        echo "Error: No JPEG2000 file specified"
+        echo "Usage: $0 check_jp2 <path-to-file.jp2>"
+        exit 1
+    fi
+
+    if [ ! -f "${jp2_file}" ]; then
+        echo "Error: File '${jp2_file}' not found"
+        exit 1
+    fi
+
+    echo "Checking JPEG2000 file: ${jp2_file}..."
+
+    # Load environment variables from .env file
+    load_env
+
+    local abs_jp2_file
+    abs_jp2_file="$(cd "$(dirname "${jp2_file}")" && pwd)/$(basename "${jp2_file}")"
+    local jp2_filename
+    jp2_filename="$(basename "${jp2_file}")"
+
+    docker run --rm \
+        --network helioviewer_default \
+        --user "${UID}:$(id -g)" \
+        --env-file "${SCRIPT_DIR}/.env" \
+        --platform=linux/x86_64 \
+        -e HOME=/tmp \
+        -v "${SCRIPT_DIR}/api:/app" \
+        -v "${abs_jp2_file}:/tmp/${jp2_filename}:ro" \
+        -w /app/management/data \
+        ghcr.io/helioviewer-project/python \
+        get_jp2_info.py "/tmp/${jp2_filename}"
+}
+
 # Download test data
 download_test_data() {
     echo "Downloading test data..."
@@ -350,7 +389,7 @@ download_test_data() {
 
     echo "Processing test data with downloader..."
     # Run the downloader to process the extracted files
-    docker run --rm \
+    podman run --rm \
         --init \
         --stop-timeout 0 \
         --network helioviewer_default \
@@ -574,6 +613,10 @@ case "$1" in
         ;;
     download_test_data)
         download_test_data
+        ;;
+    check_jp2)
+        shift
+        check_jp2 "$@"
         ;;
     pytest)
         shift
