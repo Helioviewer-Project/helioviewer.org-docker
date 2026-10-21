@@ -1,4 +1,4 @@
-FROM php:8.2.30-apache
+FROM php:8.2.35-apache
 
 ENV IMAGEMAGICK_VER=6.9.13-55
 ENV FFMPEG_VER=8.1
