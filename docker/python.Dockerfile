@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.14-slim
 
 # Install build dependencies including gfortran, cmake, and OpenBLAS for scipy
 COPY api/install/kakadu/Kakadu_v6_4_1-00781N_Linux-64-bit-Compiled.tar.gz kdu.tar.gz
