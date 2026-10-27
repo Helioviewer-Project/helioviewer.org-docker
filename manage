@@ -19,7 +19,7 @@ usage() {
     echo "  watch_3d           Watch and rebuild 3D JavaScript on changes"
     echo "  downloader         Run the Helioviewer data downloader"
     echo "  download_test_data Download test data for development"
-    echo "  check_jp2          Look up the datasource info for a given JPEG2000 file"
+    echo "  check_jp2          Look up the datasource info for a given JPEG2000 file (-d/--debug for pdb)"
     echo "  pytest             Run pytest tests in the Python container"
     echo "  init_superset      Initialize Superset database and default roles/permissions"
     echo "  prepare-dashboard  Prepare a dashboard export zip file for import"
@@ -263,29 +263,35 @@ composer() {
 }
 
 # Install npm dependencies for web client
+#
+# Runs as root inside the container (instead of --user "${UID}:$(id -g)")
+# because the bind-mounted source tree's host ownership isn't guaranteed to
+# match the invoking user's UID/GID (e.g. on Linux CI runners, where Docker
+# strictly enforces bind-mount permissions, unlike Docker Desktop on macOS).
+# Ownership is restored afterward so host files stay owned by the caller.
 npm_install() {
     echo "Installing npm dependencies..."
     docker run --rm \
-        --user "${UID}:$(id -g)" \
         -e HOME=/tmp \
         -e NODE_OPTIONS='--localstorage-file=/tmp/helioviewer_localstorage' \
         -e npm_config_cache=/tmp/.npm \
         -v "${SCRIPT_DIR}/helioviewer.org:/app" \
         -w /app \
         ghcr.io/helioviewer-project/node \
-        npm ci
+        sh -c "npm ci && chown -R ${UID}:$(id -g) /app"
 }
 
 # Build JavaScript and CSS for web client
+#
+# See npm_install for why this runs as root and chowns afterward.
 build_js_css() {
     echo "Building JavaScript and CSS..."
-    podman run --rm \
-        --user "${UID}:$(id -g)" \
+    docker run --rm \
         -e HOME=/tmp \
         -v "${SCRIPT_DIR}/helioviewer.org:/app/helioviewer.org" \
         -w /app/helioviewer.org/resources/build \
         ghcr.io/helioviewer-project/node \
-        ant
+        sh -c "ant && chown -R ${UID}:$(id -g) /app/helioviewer.org"
 }
 
 # Watch and rebuild JavaScript on changes
@@ -333,11 +339,25 @@ downloader() {
 
 # Look up datasource info for a JPEG2000 file using get_jp2_info.py
 check_jp2() {
-    local jp2_file="$1"
+    local jp2_file=""
+    local debug=false
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -d|--debug)
+                debug=true
+                shift
+                ;;
+            *)
+                jp2_file="$1"
+                shift
+                ;;
+        esac
+    done
 
     if [ -z "${jp2_file}" ]; then
         echo "Error: No JPEG2000 file specified"
-        echo "Usage: $0 check_jp2 <path-to-file.jp2>"
+        echo "Usage: $0 check_jp2 [-d|--debug] <path-to-file.jp2>"
         exit 1
     fi
 
@@ -356,7 +376,21 @@ check_jp2() {
     local jp2_filename
     jp2_filename="$(basename "${jp2_file}")"
 
-    docker run --rm \
+    # Build the command to run inside the container. The image's entrypoint
+    # is python3, so these args are passed straight to the interpreter.
+    local python_args=(get_jp2_info.py "/tmp/${jp2_filename}")
+    if [ "${debug}" = true ]; then
+        echo "Debug mode enabled: launching with pdb..."
+        python_args=(-m pdb "${python_args[@]}")
+    fi
+
+    # pdb needs an interactive TTY attached to the container
+    local docker_flags=(--rm)
+    if [ "${debug}" = true ]; then
+        docker_flags+=(-it)
+    fi
+
+    docker run "${docker_flags[@]}" \
         --network helioviewer_default \
         --user "${UID}:$(id -g)" \
         --env-file "${SCRIPT_DIR}/.env" \
@@ -366,7 +400,7 @@ check_jp2() {
         -v "${abs_jp2_file}:/tmp/${jp2_filename}:ro" \
         -w /app/management/data \
         ghcr.io/helioviewer-project/python \
-        get_jp2_info.py "/tmp/${jp2_filename}"
+        "${python_args[@]}"
 }
 
 # Download test data
@@ -389,7 +423,7 @@ download_test_data() {
 
     echo "Processing test data with downloader..."
     # Run the downloader to process the extracted files
-    podman run --rm \
+    docker run --rm \
         --init \
         --stop-timeout 0 \
         --network helioviewer_default \
