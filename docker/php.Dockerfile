@@ -52,3 +52,7 @@ EOF
 COPY ./compose/99-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 WORKDIR /var/www/api.helioviewer.org
+
+COPY docker/php-entrypoint.sh /usr/local/bin/php-entrypoint.sh
+RUN chmod +x /usr/local/bin/php-entrypoint.sh
+ENTRYPOINT ["php-entrypoint.sh"]

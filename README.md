@@ -56,6 +56,8 @@ For vscode, install the PHP Debug extension provided by xdebug and use the follo
 }
 ```
 
+The php containers use a production php.ini by default. If you wish to enable debug php for development, set the environment variable ENV=dev
+
 # Troubleshooting
 If the helioviewer isn't loading for you, here are the first things to check.
 
