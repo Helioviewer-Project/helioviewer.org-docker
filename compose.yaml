@@ -115,8 +115,16 @@ services:
     restart: always
     image: ghcr.io/helioviewer-project/coordinator
     ports:
-      - ${BIND_ADDRESS}:${COORDINATOR_PORT}:80
+      - ${BIND_ADDRESS}:${COORDINATOR_PORT}:8000
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "--fail", "http://127.0.0.1:8000/health-check"]
+      interval: 10s
+      timeout: 30s
+      retries: 6
+      start_period: 30s
   api:
+    cap_add:
+      - NET_BIND_SERVICE
     environment:
       HV_REDIS_HOST: ${HV_REDIS_HOST}
       HV_DB_HOST: ${HV_DB_HOST}
