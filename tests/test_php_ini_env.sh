@@ -5,12 +5,18 @@ set -e
 # This test verifies that the php containers select the correct php.ini
 # based on the ENV environment variable.
 # Test Steps:
-#   1. Verify the running "api" service (no ENV override) uses php.ini-production
+#   1. Start a one-off "api" container with no ENV override and verify it uses php.ini-production
 #   2. Start a one-off "api" container with ENV=dev and verify it uses php.ini-development
+#
+# Note: this uses "docker compose run" (not "exec") because the php.ini is
+# selected by the entrypoint script at container start, based on the PHPRC
+# env var it exports for its own process tree. "docker compose exec" attaches
+# a new process to an already-running container and does not see that
+# exported env, so it would not reflect the entrypoint's selection.
 
-# 1. Verify the default (production) php.ini is loaded by the running api service
+# 1. Verify the default (production) php.ini is loaded with no ENV override
 echo "Checking default php.ini (expect production)"
-prod_ini=$(docker compose exec api php --ini | grep "Loaded Configuration File")
+prod_ini=$(docker compose run --rm api php --ini | grep "Loaded Configuration File")
 echo "$prod_ini"
 if ! echo "$prod_ini" | grep -q "/usr/local/etc/php/prod/php.ini"; then
     echo "Error: api service is not using the production php.ini by default"

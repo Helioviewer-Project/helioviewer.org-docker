@@ -60,3 +60,4 @@ RUN mkdir -p /usr/local/etc/php/prod /usr/local/etc/php/dev \
 COPY docker/php-entrypoint.sh /usr/local/bin/php-entrypoint.sh
 RUN chmod +x /usr/local/bin/php-entrypoint.sh
 ENTRYPOINT ["php-entrypoint.sh"]
+CMD ["apache2-foreground"]
