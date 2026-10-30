@@ -2,9 +2,9 @@
 set -e
 
 if [ "$ENV" = "dev" ]; then
-    cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
+    export PHPRC=/usr/local/etc/php/dev
 else
-    cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
+    export PHPRC=/usr/local/etc/php/prod
 fi
 
 exec docker-php-entrypoint "$@"
