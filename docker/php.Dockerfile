@@ -55,7 +55,8 @@ WORKDIR /var/www/api.helioviewer.org
 
 RUN mkdir -p /usr/local/etc/php/prod /usr/local/etc/php/dev \
     && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/prod/php.ini \
-    && cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/dev/php.ini
+    && cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/dev/php.ini \
+    && sed -ri 's/^variables_order = .*/variables_order = "EGPCS"/' /usr/local/etc/php/prod/php.ini /usr/local/etc/php/dev/php.ini
 
 COPY docker/php-entrypoint.sh /usr/local/bin/php-entrypoint.sh
 RUN chmod +x /usr/local/bin/php-entrypoint.sh
