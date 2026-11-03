@@ -8,8 +8,20 @@ ENV FFMPEG_VER=8.1
 # Setup apache to serve from the docroot folder.
 # Install composer for php dependencies
 ENV APACHE_DOCUMENT_ROOT /var/www/api.helioviewer.org/docroot
+WORKDIR /tmp/kakadu
 COPY api/install/kakadu/Kakadu_v6_4_1-00781N_Linux-64-bit-Compiled.tar.gz kdu.tar.gz
 RUN <<EOF
+set -e
+tar xzf kdu.tar.gz
+mv bin/* /usr/local/bin
+mv lib/* /usr/lib
+cd /
+rm -rf /tmp/kakadu
+EOF
+
+WORKDIR /tmp
+RUN <<EOF
+set -e
 apt update
 apt install -y unzip libpng-dev libjpeg-dev libfreetype-dev libmariadb-dev
 # When upgrading to ImageMagick 7, remove the trailing "6" from the repo name below (ImageMagick6 -> ImageMagick)
@@ -39,10 +51,6 @@ pecl install redis
 pecl install xdebug
 pecl install imagick
 docker-php-ext-enable redis xdebug imagick
-tar xzf kdu.tar.gz
-mv bin/* /usr/local/bin
-mv lib/* /usr/lib
-rm -r bin lib
 sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 a2enmod rewrite
