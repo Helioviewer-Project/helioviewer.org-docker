@@ -39,7 +39,7 @@ apt install -y build-essential nasm libx264-dev libvpx-dev
 ./configure --enable-gpl --enable-libx264 --enable-libvpx
 make -j $(nproc)
 make install
-apt remove build-essential nasm
+apt remove -y build-essential nasm
 apt clean
 cd ..
 rm -rf ffmpeg-$FFMPEG_VER
