@@ -1,7 +1,7 @@
 FROM ghcr.io/helioviewer-project/php
 RUN <<END_OF_COMMANDS
 apt update
-apt install -y ruby tcsh
+apt install -y ruby tcsh librsvg2-bin
 gem install resque
 docker-php-ext-configure pcntl
 docker-php-ext-install -j $(nproc) pcntl
