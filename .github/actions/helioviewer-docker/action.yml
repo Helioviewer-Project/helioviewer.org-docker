@@ -58,5 +58,20 @@ runs:
         && ./manage up \
         && mkdir -p data/jp2/push \
         && cp compose/*.jp2 data/jp2/push/ \
-        && ./manage downloader -d local -b local -m localmove -s \"2021-01-01 00:00:00\" -e \"2022-01-01 00:00:00\" \
-        && ./manage download_test_data
+        && ./manage downloader -d local -b local -m localmove -s \"2021-01-01 00:00:00\" -e \"2022-01-01 00:00:00\"
+
+    - name: Cache test data tarball
+      uses: actions/cache@v4
+      with:
+        path: helioviewer.org-docker/.cache/sample.tar.gz
+        key: test-data-tarball-v1
+
+    - name: Download test data tarball
+      shell: bash
+      working-directory: helioviewer.org-docker
+      run: ./manage download_test_tarball
+
+    - name: Ingest test data
+      shell: bash
+      working-directory: helioviewer.org-docker
+      run: ./manage ingest_test_data
