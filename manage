@@ -18,7 +18,9 @@ usage() {
     echo "  watch_js           Watch and rebuild JavaScript on changes"
     echo "  watch_3d           Watch and rebuild 3D JavaScript on changes"
     echo "  downloader         Run the Helioviewer data downloader"
-    echo "  download_test_data Download test data for development"
+    echo "  download_test_data   Download and ingest test data for development"
+    echo "  download_test_tarball Download the test data tarball (cacheable, skips if already present)"
+    echo "  ingest_test_data     Extract and ingest a previously downloaded test data tarball"
     echo "  check_jp2          Look up the datasource info for a given JPEG2000 file (-d/--debug for pdb)"
     echo "  pytest             Run pytest tests in the Python container"
     echo "  init_superset      Initialize Superset database and default roles/permissions"
@@ -403,9 +405,34 @@ check_jp2() {
         "${python_args[@]}"
 }
 
-# Download test data
-download_test_data() {
-    echo "Downloading test data..."
+# Download the test data tarball.
+# The tarball is downloaded to TEST_DATA_TARBALL_PATH (defaults to
+# ${SCRIPT_DIR}/.cache/sample.tar.gz) so that it can be cached between
+# runs (e.g. with actions/cache in GitHub Actions). If the file already
+# exists, the download is skipped.
+download_test_tarball() {
+    local tarball_path="${TEST_DATA_TARBALL_PATH:-${SCRIPT_DIR}/.cache/sample.tar.gz}"
+
+    mkdir -p "$(dirname "${tarball_path}")"
+
+    if [ -f "${tarball_path}" ]; then
+        echo "Test data tarball already present at ${tarball_path}, skipping download"
+        return 0
+    fi
+
+    echo "Downloading test data tarball from https://helioviewer.org/jp2/sample.tar.gz..."
+    curl -L -o "${tarball_path}" https://helioviewer.org/jp2/sample.tar.gz
+}
+
+# Extract the test data tarball and ingest it with the downloader
+ingest_test_data() {
+    local tarball_path="${TEST_DATA_TARBALL_PATH:-${SCRIPT_DIR}/.cache/sample.tar.gz}"
+
+    if [ ! -f "${tarball_path}" ]; then
+        echo "Error: test data tarball not found at ${tarball_path}"
+        echo "Run '$0 download_test_tarball' first"
+        exit 1
+    fi
 
     # Load environment variables from .env file
     load_env
@@ -413,13 +440,8 @@ download_test_data() {
     # Create push directory if it doesn't exist
     mkdir -p "${HOST_JPEG2000_PATH}/push"
 
-    # Download and extract the test data tarball
-    echo "Downloading test data tarball from https://helioviewer.org/jp2/sample.tar.gz..."
-    curl -L -o /tmp/sample.tar.gz https://helioviewer.org/jp2/sample.tar.gz
-
     echo "Extracting test data to ${HOST_JPEG2000_PATH}/push/..."
-    tar -xzf /tmp/sample.tar.gz -C "${HOST_JPEG2000_PATH}/push/"
-    rm -f /tmp/sample.tar.gz
+    tar -xzf "${tarball_path}" -C "${HOST_JPEG2000_PATH}/push/"
 
     echo "Processing test data with downloader..."
     # Run the downloader to process the extracted files
@@ -444,6 +466,12 @@ download_test_data() {
         "'
 
     echo "Test data downloaded and processed successfully"
+}
+
+# Download and ingest test data (convenience wrapper)
+download_test_data() {
+    download_test_tarball
+    ingest_test_data
 }
 
 # Run pytest tests
@@ -647,6 +675,12 @@ case "$1" in
         ;;
     download_test_data)
         download_test_data
+        ;;
+    download_test_tarball)
+        download_test_tarball
+        ;;
+    ingest_test_data)
+        ingest_test_data
         ;;
     check_jp2)
         shift
