@@ -23,7 +23,7 @@ WORKDIR /tmp
 RUN <<EOF
 set -e
 apt update
-apt install -y unzip libpng-dev libjpeg-dev libfreetype-dev libmariadb-dev
+apt install -y unzip libpng-dev libjpeg-dev libfreetype-dev libmariadb-dev librsvg2-bin
 # When upgrading to ImageMagick 7, remove the trailing "6" from the repo name below (ImageMagick6 -> ImageMagick)
 curl -s --output imagemagick.zip -X GET https://codeload.github.com/ImageMagick/ImageMagick6/zip/refs/tags/$IMAGEMAGICK_VER
 unzip imagemagick.zip
