@@ -193,7 +193,7 @@ init_composer() {
         -v "${SCRIPT_DIR}/api:/app" \
         -w /app \
         composer:latest \
-        composer install
+        composer install --ignore-platform-req=ext-mbstring
 }
 
 # Initialize all settings for Docker environment
