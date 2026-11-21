@@ -133,6 +133,11 @@ init_config() {
         # Add CORS allowed origins
         sed -i.bak "s|;acao_url\[\] = ''|acao_url[] = 'http://localhost:8080'\nacao_url[] = 'http://127.0.0.1:8080'\nacao_url[] = '${CLIENT_URL}'|" "${config_file}"
 
+        # The User-Agent the API sends to the events API: name this setup in its logs
+        local ua_where="docker"
+        [ -n "${GITHUB_ACTIONS}" ] && ua_where="github ci"
+        sed -i.bak "s|^events_api_user_agent = .*|events_api_user_agent = \"Helioviewer-API/2.0 (+${API_URL}; ${ua_where})\"|" "${config_file}"
+
         # Clean up backup file
         rm -f "${config_file}.bak"
 
